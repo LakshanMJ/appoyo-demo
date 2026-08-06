@@ -1,5 +1,5 @@
 import { Calendar, ChevronDown, ChevronLeft, ChevronRight, Copy, Filter, MoreHorizontal, Upload, User } from 'lucide-react';
-import { formatWeekRange } from '../../lib/week';
+import { formatWeekRange } from '../../utils/week';
 
 interface RosterToolbarProps {
   staffName: string;

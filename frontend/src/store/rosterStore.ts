@@ -1,11 +1,11 @@
 import { create } from 'zustand';
 import { MOCK_SHIFTS, MOCK_VACANT_SHIFTS, PARTICIPANTS, STAFF } from '../data/mockData';
-import { rosterApi } from '../lib/api';
+import { rosterApi } from '../api/apiClient';
 import type { CreateShiftDto, Participant, Shift, Staff } from '../types/roster';
 
 // Toggle this to false once your NestJS endpoints are live —
 // it lets the frontend be built and demoed independently of the backend.
-const USE_MOCK_DATA = true;
+const USE_MOCK_DATA = false;
 
 interface RosterStore {
   participants: Participant[];
@@ -28,6 +28,7 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
   vacantShifts: MOCK_VACANT_SHIFTS,
   isLoading: false,
 
+  // 1
   loadWeek: async (weekStartIso) => {
     if (USE_MOCK_DATA) return; // mock data is already loaded synchronously
     set({ isLoading: true });
@@ -45,10 +46,12 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
     }
   },
 
+  // 2
   getStaff: (staffId) => STAFF[staffId] ?? { id: staffId, name: 'Unknown Staff' },
 
   // Optimistic move: update local state immediately so the drag feels instant,
   // then persist to the backend. Roll back if the request fails.
+  // 3
   moveShift: async (shiftId, targetParticipantId, targetDate) => {
     const prevShifts = get().shifts;
     const prevVacant = get().vacantShifts;
@@ -78,6 +81,7 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
     }
   },
 
+  // 4
   createShift: async (dto) => {
     const tempId = `temp-${Date.now()}`;
     const optimisticShift: Shift = { ...dto, id: tempId, hasAlert: dto.hasAlert ?? true, colorKey: dto.staffId };
@@ -104,6 +108,7 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
     }
   },
 
+  // 5
   duplicateShift: async (shift) => {
     await get().createShift({
       participantId: shift.participantId,
@@ -116,6 +121,7 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
     });
   },
 
+  // 6
   addParticipant: (name) => {
     const newParticipant: Participant = {
       id: `p-${Date.now()}`,

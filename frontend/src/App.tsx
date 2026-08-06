@@ -3,7 +3,7 @@ import { TopBar } from './components/layout/TopBar';
 import { SideNav } from './components/layout/SideNav';
 import { RosterToolbar } from './components/roster/RosterToolbar';
 import { RosterGrid } from './components/roster/RosterGrid';
-import { getWeekStart, nextWeek, prevWeek } from './lib/week';
+import { getWeekStart, nextWeek, prevWeek } from './utils/week';
 
 export default function App() {
   const [view, setView] = useState<'personal' | 'company'>('company');

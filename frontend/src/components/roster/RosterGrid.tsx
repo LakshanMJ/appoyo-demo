@@ -1,6 +1,6 @@
   import { useState } from 'react';
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors, type DragEndEvent, type DragStartEvent } from '@dnd-kit/core';
-import { getWeekColumns } from '../../lib/week';
+import { getWeekColumns } from '../../utils/week';
 import { useRosterStore } from '../../store/rosterStore';
 import type { Shift } from '../../types/roster';
 import { GridHeader } from './GridHeader';

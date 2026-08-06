@@ -1,7 +1,7 @@
 import { AlertCircle } from 'lucide-react';
-import type { DayColumn } from '../../lib/week';
+import type { DayColumn } from '../../utils/week';
 import type { Shift, Staff } from '../../types/roster';
-import { cellBorderClasses } from '../../lib/gridCell';
+import { cellBorderClasses } from '../../utils/gridCell';
 import { DayCell } from './DayCell';
 
 interface VacantShiftRowProps {

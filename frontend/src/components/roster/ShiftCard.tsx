@@ -2,7 +2,7 @@ import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { AlertTriangle, Copy } from 'lucide-react';
 import type { Shift, Staff } from '../../types/roster';
-import { getShiftColor } from '../../lib/shiftColor';
+import { getShiftColor } from '../../utils/shiftColor';
 
 interface ShiftCardProps {
   shift: Shift;

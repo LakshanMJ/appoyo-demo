@@ -1,6 +1,6 @@
 import { Plus } from 'lucide-react';
-import type { DayColumn } from '../../lib/week';
-import { cellBorderClasses } from '../../lib/gridCell';
+import type { DayColumn } from '../../utils/week';
+import { cellBorderClasses } from '../../utils/gridCell';
 
 interface AddParticipantRowProps {
   days: DayColumn[];
