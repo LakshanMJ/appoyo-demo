@@ -1,21 +1,22 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
-// import { STAFF } from '../../data/mockData';
-import type { Caregiver, CreateShiftDto, ShiftTag } from '../../types/roster';
+import type { Caregiver, CreateShiftDto, ShiftType } from '../../types/roster';
 import { DesktopTimePicker } from '@mui/x-date-pickers/DesktopTimePicker';
 import dayjs, { Dayjs } from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
 
-// interface AddShiftModalProps {
-//   participantId: string | null;
-//   caregivers: Caregiver[];
-//   isoDate: string;
-//   onClose: () => void;
-//   onSubmit: (dto: CreateShiftDto) => void;
-// }
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+// TODO: pull this from the selected roster/org context instead of hardcoding,
+// e.g. props.orgTimezone, so this works for orgs outside Brisbane.
+const ORG_TZ = 'Australia/Brisbane';
 
 interface AddShiftModalProps {
   participantId: string | null;
   caregivers: Caregiver[];
+  participants: { id: string; name: string }[];
   isoDate: string;
   onClose: () => void;
   onSubmit: (
@@ -25,7 +26,8 @@ interface AddShiftModalProps {
     message?: string;
   }>;
 }
-const TAG_OPTIONS: { value: ShiftTag; label: string }[] = [
+
+const TYPE_OPTIONS: { value: ShiftType; label: string }[] = [
   { value: 'assistance', label: 'Assistance' },
   { value: 'transport', label: 'Transport' },
   { value: 'domestic', label: 'Domestic' },
@@ -33,60 +35,67 @@ const TAG_OPTIONS: { value: ShiftTag; label: string }[] = [
   { value: 'nursing', label: 'Nursing' },
 ];
 
-export function AddShiftModal({ participantId, isoDate, onClose, onSubmit, caregivers }: AddShiftModalProps) {
-  console.log(caregivers, 'caregivers')
-  // const [staffId, setStaffId] = useState(Object.keys(STAFF)[0]);
+export function AddShiftModal({ participantId, isoDate, onClose, onSubmit, caregivers, participants }: AddShiftModalProps) {
   const [caregiverId, setCaregiverId] = useState('');
+  const [selectedParticipantId, setSelectedParticipantId] = useState(participantId ?? '');
   const [startTime, setStartTime] = useState<Dayjs | null>(dayjs());
   const [endTime, setEndTime] = useState<Dayjs | null>(dayjs());
   const [error, setError] = useState<string | null>(null);
-  const [tag, setTag] = useState<ShiftTag>('assistance');
+  const [type, setType] = useState<ShiftType>('assistance');
   const [hasAlert, setHasAlert] = useState(true);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    setError("");
+    setError('');
 
     if (!startTime || !endTime) {
-      setError("Start time and end time are required.");
+      setError('Start time and end time are required.');
       return;
     }
 
     if (startTime.isAfter(endTime) || startTime.isSame(endTime)) {
-      setError("Start time must be before end time.");
+      setError('Start time must be before end time.');
       return;
     }
 
-    if (endTime.diff(startTime, "minute") < 15) {
-      setError("Shift duration must be at least 15 minutes.");
+    if (endTime.diff(startTime, 'minute') < 15) {
+      setError('Shift duration must be at least 15 minutes.');
       return;
     }
 
-    const startDateTime = dayjs(isoDate)
-      .hour(startTime.hour())
-      .minute(startTime.minute())
-      .second(0)
-      .millisecond(0);
+    const startDateTime = dayjs.tz(
+      `${isoDate} ${startTime.format('HH:mm:ss')}`,
+      'YYYY-MM-DD HH:mm:ss',
+      ORG_TZ
+    );
 
-    const endDateTime = dayjs(isoDate)
-      .hour(endTime.hour())
-      .minute(endTime.minute())
-      .second(0)
-      .millisecond(0);
+    const endDateTime = dayjs.tz(
+      `${isoDate} ${endTime.format('HH:mm:ss')}`,
+      'YYYY-MM-DD HH:mm:ss',
+      ORG_TZ
+    );
 
+    const finalParticipantId =
+      participantId ?? selectedParticipantId;
+
+    // if (!finalParticipantId) {
+    //   setError("Please select a participant.");
+    //   return;
+    // }
     const result = await onSubmit({
-      participantId,
+      // participantId: finalParticipantId,
+      participantId: participantId || null,
       caregiverId: caregiverId || null,
       date: isoDate,
       startTime: startDateTime.toISOString(),
       endTime: endDateTime.toISOString(),
-      tag,
+      type,
       hasAlert,
     });
 
     if (!result.success) {
-      setError(result.message ?? "Failed creating shift");
+      setError(result.message ?? 'Failed creating shift');
       return;
     }
 
@@ -94,11 +103,11 @@ export function AddShiftModal({ participantId, isoDate, onClose, onSubmit, careg
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
-        <div className="mb-5 flex items-center justify-between">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+      <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+        <div className="mb-1 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-slate-900">Add Shift</h2>
-          <button onClick={onClose} aria-label="Close" className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100">
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -109,38 +118,59 @@ export function AddShiftModal({ participantId, isoDate, onClose, onSubmit, careg
         </p>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <label className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium text-slate-700">Staff member</span>
-            <select
-              value={caregiverId}
-              onChange={(e) => setCaregiverId(e.target.value)}
-              className="rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-800 focus:border-teal-400 focus:outline-none"
-            >
-              {caregivers.map((caregiver) => (
-                <option
-                  key={caregiver.id}
-                  value={caregiver.id}
-                >
-                  {caregiver.name}
+          {/* {participantId === null && (
+            <label className="flex flex-col gap-1.5">
+              <span className="text-sm font-medium text-slate-700">Participant</span>
+              <select
+                value={selectedParticipantId}
+                onChange={(e) =>
+                  setSelectedParticipantId(e.target.value)
+                }
+                className="rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-800 focus:border-teal-400 focus:outline-none"
+              >
+                <option value="">
+                  Select participant
                 </option>
-              ))}
-            </select>
-          </label>
 
+                {participants.map((participant) => (
+                  <option
+                    key={participant.id}
+                    value={participant.id}
+                  >
+                    {participant.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )} */}
+          {participantId !== null && (
+            <label className="flex flex-col gap-1.5">
+              <span className="text-sm font-medium text-slate-700">Staff member</span>
+              <select
+                value={caregiverId}
+                onChange={(e) => setCaregiverId(e.target.value)}
+                className="rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-800 focus:border-teal-400 focus:outline-none"
+              >
+                <option value="">Unassigned</option>
+                {caregivers.map((caregiver) => (
+                  <option key={caregiver.id} value={caregiver.id}>
+                    {caregiver.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
           <div className="grid grid-cols-2 gap-3">
             <label className="flex flex-col gap-1.5">
               <span className="text-sm font-medium text-slate-700">Start time</span>
               <DesktopTimePicker
                 value={startTime}
                 onChange={(newValue) => {
-                  setError("");
+                  setError('');
                   setStartTime(newValue);
                 }}
                 slotProps={{
-                  textField: {
-                    size: 'small',
-                    fullWidth: true,
-                  },
+                  textField: { size: 'small', fullWidth: true },
                 }}
               />
             </label>
@@ -149,14 +179,11 @@ export function AddShiftModal({ participantId, isoDate, onClose, onSubmit, careg
               <DesktopTimePicker
                 value={endTime}
                 onChange={(newValue) => {
-                  setError("");
+                  setError('');
                   setEndTime(newValue);
                 }}
                 slotProps={{
-                  textField: {
-                    size: 'small',
-                    fullWidth: true,
-                  },
+                  textField: { size: 'small', fullWidth: true },
                 }}
               />
             </label>
@@ -165,11 +192,11 @@ export function AddShiftModal({ participantId, isoDate, onClose, onSubmit, careg
           <label className="flex flex-col gap-1.5">
             <span className="text-sm font-medium text-slate-700">Shift type</span>
             <select
-              value={tag}
-              onChange={(e) => setTag(e.target.value as ShiftTag)}
+              value={type}
+              onChange={(e) => setType(e.target.value as ShiftType)}
               className="rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-800 focus:border-teal-400 focus:outline-none"
             >
-              {TAG_OPTIONS.map((opt) => (
+              {TYPE_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
                   {opt.label}
                 </option>
@@ -186,11 +213,13 @@ export function AddShiftModal({ participantId, isoDate, onClose, onSubmit, careg
             />
             Flag for review
           </label>
+
           {error && (
             <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-700">
               {error}
             </div>
           )}
+
           <div className="mt-2 flex justify-end gap-3">
             <button
               type="button"

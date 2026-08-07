@@ -88,6 +88,7 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
 
   // 4 - working
   createShift: async (dto) => {
+    console.log(dto, 'createShift dto')
     const tempId = `temp-${Date.now()}`;
     const optimisticShift: Shift = {
       ...dto,

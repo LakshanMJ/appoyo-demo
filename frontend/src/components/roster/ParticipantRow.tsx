@@ -1,7 +1,16 @@
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
 import type { DayColumn } from '../../utils/week';
 import type { Participant, Shift, Staff } from '../../types/roster';
 import { cellBorderClasses } from '../../utils/gridCell';
 import { DayCell } from './DayCell';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+// TODO: source from org/context instead of hardcoding, same as AddShiftModal
+const ORG_TZ = 'Australia/Brisbane';
 
 interface ParticipantRowProps {
   participant: Participant;
@@ -23,6 +32,12 @@ function formatMoney(amount?: number): string {
   })}`;
 }
 
+// Group once per render instead of re-filtering + re-parsing dates
+// for every day column (was O(days * shifts) date parses before).
+function shiftLocalDate(isoString: string): string {
+  return dayjs(isoString).tz(ORG_TZ).format('YYYY-MM-DD');
+}
+
 export function ParticipantRow({
   participant,
   days,
@@ -32,7 +47,6 @@ export function ParticipantRow({
   onDuplicateShift,
   onShiftClick,
 }: ParticipantRowProps) {
-  console.log(shifts, 'shifts in ParticipantRow');
   return (
     <>
       <div className={`px-3 py-4 ${cellBorderClasses(0)}`}>
@@ -50,10 +64,7 @@ export function ParticipantRow({
           <DayCell
             participantId={participant.id}
             isoDate={day.isoDate}
-            shifts={shifts.filter(
-              (s) =>
-                s.startTime.slice(0, 10) === day.isoDate
-            )}
+            shifts={shifts.filter((s) => shiftLocalDate(s.startTime) === day.isoDate)}
             loadCaregivers={loadCaregivers}
             onAddShift={onAddShift}
             onDuplicateShift={onDuplicateShift}

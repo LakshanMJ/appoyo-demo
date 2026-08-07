@@ -36,7 +36,7 @@ export interface Shift {
   date: string; // ISO date, e.g. "2026-02-23"
   startTime: string; // "07:00"
   endTime: string; // "20:00"
-  tag: ShiftTag;
+  type: ShiftType;
   hasAlert: boolean; // renders the red "!" pill variant
   colorKey: string; // deterministic color derived from staffId, see lib/shiftColor.ts
 }
@@ -57,7 +57,7 @@ export interface CreateShiftDto {
   date: string;
   startTime: string;
   endTime: string;
-  tag: ShiftTag;
+  type: ShiftType;
   hasAlert?: boolean;
 }
 

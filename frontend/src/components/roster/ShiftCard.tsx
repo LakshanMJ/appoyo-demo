@@ -47,7 +47,7 @@ export function ShiftCard({ shift, caregiver, onDuplicate, onClick }: ShiftCardP
     id: shift.id,
     data: { shift },
   });
-  console.log("SHIFT CARD DATA", shift);
+
   const color = getShiftColor(shift.caregiverId || 'unassigned');
 
   const style = {
@@ -56,8 +56,7 @@ export function ShiftCard({ shift, caregiver, onDuplicate, onClick }: ShiftCardP
     backgroundColor: color.bg,
   };
 
-  const config =
-    shiftTypeConfig[shift.type as keyof typeof shiftTypeConfig];
+  const config = shiftTypeConfig[shift.type as keyof typeof shiftTypeConfig];
 
   const Icon = config?.icon;
   return (
@@ -112,7 +111,7 @@ export function ShiftCard({ shift, caregiver, onDuplicate, onClick }: ShiftCardP
 
       <div className="flex items-center justify-between">
         {config ? (
-          <span className="flex items-center gap-1 rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-600">
+          <span className="flex items-center gap-1 rounded-md bg-[#FFEED4] px-1.5 py-0.5 text-[10px] font-medium text-amber-700">
             {Icon && <Icon className="h-3 w-3" />}
             {config.label}
           </span>

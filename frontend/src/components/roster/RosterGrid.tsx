@@ -20,7 +20,6 @@ export function RosterGrid({ weekStart }: RosterGridProps) {
 
   const { loadCaregivers, caregivers, loadParticipants, participants, loadShifts, shifts, vacantShifts, moveShift, createShift, duplicateShift, createParticipant } =
     useRosterStore();
-  console.log(shifts, 'shifts in RosterGrid');
   const [activeShift, setActiveShift] = useState<Shift | null>(null);
   const [modalTarget, setModalTarget] = useState<{ participantId: string | null; isoDate: string } | null>(null);
   const [showParticipantModal, setShowParticipantModal] = useState(false);
@@ -49,9 +48,9 @@ export function RosterGrid({ weekStart }: RosterGridProps) {
     loadCaregivers();
     loadParticipants();
     loadShifts(
-    days[0].isoDate,
-    days[6].isoDate
-  );
+      days[0].isoDate,
+      days[6].isoDate
+    );
   }, [weekStart]);
 
   return (
@@ -59,15 +58,6 @@ export function RosterGrid({ weekStart }: RosterGridProps) {
       <div className="flex-1 overflow-auto rounded-none border border-slate-200 bg-white">
         <div className="grid grid-cols-[220px_repeat(7,minmax(150px,1fr))]">
           <GridHeader days={days} />
-
-          {/* <VacantShiftRow
-            days={days}
-            shifts={vacantShifts}
-            loadCaregivers={loadCaregivers}
-            onAddShift={(pId, date) => setModalTarget({ participantId: pId, isoDate: date })}
-            onDuplicateShift={duplicateShift}
-            onShiftClick={() => { }}
-          /> */}
 
           <VacantShiftRow
             days={days}
@@ -84,19 +74,6 @@ export function RosterGrid({ weekStart }: RosterGridProps) {
             onDuplicateShift={duplicateShift}
             onShiftClick={() => { }}
           />
-
-          {/* {participants.map((participant) => (
-            <ParticipantRow
-              key={participant.id}
-              participant={participant}
-              days={days}
-              shifts={shifts.filter((s) => s.participantId === participant.id)}
-              loadCaregivers={loadCaregivers}
-              onAddShift={(pId, date) => setModalTarget({ participantId: pId, isoDate: date })}
-              onDuplicateShift={duplicateShift}
-              onShiftClick={() => { }}
-            />
-          ))} */}
 
           {participants.map((participant) => (
             <ParticipantRow
@@ -144,6 +121,7 @@ export function RosterGrid({ weekStart }: RosterGridProps) {
 
       {modalTarget && (
         <AddShiftModal
+          participants={participants}
           caregivers={caregivers}
           participantId={modalTarget.participantId}
           isoDate={modalTarget.isoDate}
