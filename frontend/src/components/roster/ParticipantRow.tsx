@@ -7,38 +7,41 @@ interface ParticipantRowProps {
   participant: Participant;
   days: DayColumn[];
   shifts: Shift[];
-  getStaff: (staffId: string) => Staff;
+  loadCaregivers: (caregiverId: string) => Staff | undefined;
   onAddShift: (participantId: string | null, isoDate: string) => void;
   onDuplicateShift: (shift: Shift) => void;
   onShiftClick: (shift: Shift) => void;
 }
 
-function formatMoney(cents: number): string {
-  const dollars = cents / 100;
-  if (dollars >= 1000) {
-    return `$${Math.round(dollars / 1000)}k`;
+function formatMoney(amount?: number): string {
+  if (amount == null) return '$0';
+  if (amount >= 1000) {
+    return `$${Math.round(amount / 1000)}k`;
   }
-  return `$${dollars.toLocaleString('en-AU', { maximumFractionDigits: 0 })}`;
+  return `$${amount.toLocaleString('en-AU', {
+    maximumFractionDigits: 0,
+  })}`;
 }
 
 export function ParticipantRow({
   participant,
   days,
   shifts,
-  getStaff,
+  loadCaregivers,
   onAddShift,
   onDuplicateShift,
   onShiftClick,
 }: ParticipantRowProps) {
+  console.log(shifts, 'shifts in ParticipantRow');
   return (
     <>
       <div className={`px-3 py-4 ${cellBorderClasses(0)}`}>
         <p className="text-[15px] font-semibold text-slate-900">{participant.name}</p>
         <p className="mt-1 text-sm text-slate-500">
-          Allocated: <span className="font-medium text-teal-600">{formatMoney(participant.allocatedBudgetCents)}</span>
+          Allocated: <span className="font-medium text-teal-600">{formatMoney(participant.allocatedBudget)}</span>
         </p>
         <p className="text-sm text-slate-500">
-          Used: <span className="font-medium text-teal-600">{formatMoney(participant.usedBudgetCents)}</span>
+          Used: <span className="font-medium text-teal-600">{formatMoney(participant.usedBudget)}</span>
         </p>
       </div>
 
@@ -47,8 +50,11 @@ export function ParticipantRow({
           <DayCell
             participantId={participant.id}
             isoDate={day.isoDate}
-            shifts={shifts.filter((s) => s.date === day.isoDate)}
-            getStaff={getStaff}
+            shifts={shifts.filter(
+              (s) =>
+                s.startTime.slice(0, 10) === day.isoDate
+            )}
+            loadCaregivers={loadCaregivers}
             onAddShift={onAddShift}
             onDuplicateShift={onDuplicateShift}
             onShiftClick={onShiftClick}

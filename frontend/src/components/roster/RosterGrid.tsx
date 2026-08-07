@@ -1,4 +1,4 @@
-  import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors, type DragEndEvent, type DragStartEvent } from '@dnd-kit/core';
 import { getWeekColumns } from '../../utils/week';
 import { useRosterStore } from '../../store/rosterStore';
@@ -9,6 +9,7 @@ import { ParticipantRow } from './ParticipantRow';
 import { AddParticipantRow } from './AddParticipantRow';
 import { AddShiftModal } from './AddShiftModal';
 import { ShiftCard } from './ShiftCard';
+import { AddParticipantModal } from './AddParticipantModal';
 
 interface RosterGridProps {
   weekStart: Date;
@@ -16,11 +17,13 @@ interface RosterGridProps {
 
 export function RosterGrid({ weekStart }: RosterGridProps) {
   const days = getWeekColumns(weekStart);
-  const { participants, shifts, vacantShifts, getStaff, moveShift, createShift, duplicateShift, addParticipant } =
-    useRosterStore();
 
+  const { loadCaregivers, caregivers, loadParticipants, participants, loadShifts, shifts, vacantShifts, moveShift, createShift, duplicateShift, createParticipant } =
+    useRosterStore();
+  console.log(shifts, 'shifts in RosterGrid');
   const [activeShift, setActiveShift] = useState<Shift | null>(null);
   const [modalTarget, setModalTarget] = useState<{ participantId: string | null; isoDate: string } | null>(null);
+  const [showParticipantModal, setShowParticipantModal] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -42,20 +45,58 @@ export function RosterGrid({ weekStart }: RosterGridProps) {
     moveShift(active.id as string, dropData.participantId, dropData.isoDate);
   }
 
+  useEffect(() => {
+    loadCaregivers();
+    loadParticipants();
+    loadShifts(
+    days[0].isoDate,
+    days[6].isoDate
+  );
+  }, [weekStart]);
+
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className="flex-1 overflow-auto rounded-none border border-slate-200 bg-white">
         <div className="grid grid-cols-[220px_repeat(7,minmax(150px,1fr))]">
           <GridHeader days={days} />
 
+          {/* <VacantShiftRow
+            days={days}
+            shifts={vacantShifts}
+            loadCaregivers={loadCaregivers}
+            onAddShift={(pId, date) => setModalTarget({ participantId: pId, isoDate: date })}
+            onDuplicateShift={duplicateShift}
+            onShiftClick={() => { }}
+          /> */}
+
           <VacantShiftRow
             days={days}
             shifts={vacantShifts}
-            getStaff={getStaff}
-            onAddShift={(pId, date) => setModalTarget({ participantId: pId, isoDate: date })}
+            loadCaregivers={(caregiverId) =>
+              caregivers.find((c) => c.id === caregiverId)
+            }
+            onAddShift={(pId, date) =>
+              setModalTarget({
+                participantId: pId,
+                isoDate: date,
+              })
+            }
             onDuplicateShift={duplicateShift}
-            onShiftClick={() => {}}
+            onShiftClick={() => { }}
           />
+
+          {/* {participants.map((participant) => (
+            <ParticipantRow
+              key={participant.id}
+              participant={participant}
+              days={days}
+              shifts={shifts.filter((s) => s.participantId === participant.id)}
+              loadCaregivers={loadCaregivers}
+              onAddShift={(pId, date) => setModalTarget({ participantId: pId, isoDate: date })}
+              onDuplicateShift={duplicateShift}
+              onShiftClick={() => { }}
+            />
+          ))} */}
 
           {participants.map((participant) => (
             <ParticipantRow
@@ -63,34 +104,58 @@ export function RosterGrid({ weekStart }: RosterGridProps) {
               participant={participant}
               days={days}
               shifts={shifts.filter((s) => s.participantId === participant.id)}
-              getStaff={getStaff}
-              onAddShift={(pId, date) => setModalTarget({ participantId: pId, isoDate: date })}
+              loadCaregivers={(caregiverId) =>
+                caregivers.find((c) => c.id === caregiverId)
+              }
+              onAddShift={(pId, date) =>
+                setModalTarget({ participantId: pId, isoDate: date })
+              }
               onDuplicateShift={duplicateShift}
-              onShiftClick={() => {}}
+              onShiftClick={() => { }}
             />
           ))}
 
           <AddParticipantRow
             days={days}
-            onAddParticipant={() => {
-              const name = prompt('Participant name');
-              if (name) addParticipant(name);
-            }}
+            onAddParticipant={() => setShowParticipantModal(true)}
             onAddShift={(isoDate) => setModalTarget({ participantId: null, isoDate })}
           />
         </div>
       </div>
 
-      <DragOverlay>
+      {/* <DragOverlay>
         {activeShift ? <ShiftCard shift={activeShift} staff={getStaff(activeShift.staffId)} /> : null}
+      </DragOverlay> */}
+
+      <DragOverlay>
+        {activeShift ? (
+          <ShiftCard
+            shift={activeShift}
+            caregiver={
+              activeShift.caregiverId
+                ? caregivers.find(
+                  (c) => c.id === activeShift.caregiverId
+                )
+                : undefined
+            }
+          />
+        ) : null}
       </DragOverlay>
 
       {modalTarget && (
         <AddShiftModal
+          caregivers={caregivers}
           participantId={modalTarget.participantId}
           isoDate={modalTarget.isoDate}
           onClose={() => setModalTarget(null)}
           onSubmit={createShift}
+        />
+      )}
+
+      {showParticipantModal && (
+        <AddParticipantModal
+          onClose={() => setShowParticipantModal(false)}
+          onSubmit={createParticipant}
         />
       )}
     </DndContext>

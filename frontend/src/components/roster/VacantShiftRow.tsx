@@ -1,13 +1,13 @@
 import { AlertCircle } from 'lucide-react';
 import type { DayColumn } from '../../utils/week';
-import type { Shift, Staff } from '../../types/roster';
+import type { Caregiver, Shift, Staff } from '../../types/roster';
 import { cellBorderClasses } from '../../utils/gridCell';
 import { DayCell } from './DayCell';
 
 interface VacantShiftRowProps {
   days: DayColumn[];
   shifts: Shift[];
-  getStaff: (staffId: string) => Staff;
+  loadCaregivers: (caregiverId: string) => Caregiver | undefined;
   onAddShift: (participantId: string | null, isoDate: string) => void;
   onDuplicateShift: (shift: Shift) => void;
   onShiftClick: (shift: Shift) => void;
@@ -16,7 +16,7 @@ interface VacantShiftRowProps {
 export function VacantShiftRow({
   days,
   shifts,
-  getStaff,
+  loadCaregivers,
   onAddShift,
   onDuplicateShift,
   onShiftClick,
@@ -37,7 +37,7 @@ export function VacantShiftRow({
             participantId={null}
             isoDate={day.isoDate}
             shifts={shifts.filter((s) => s.date === day.isoDate)}
-            getStaff={getStaff}
+            loadCaregivers={loadCaregivers}
             onAddShift={onAddShift}
             onDuplicateShift={onDuplicateShift}
             onShiftClick={onShiftClick}

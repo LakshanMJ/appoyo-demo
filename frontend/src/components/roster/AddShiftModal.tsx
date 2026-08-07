@@ -1,15 +1,30 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
-import { STAFF } from '../../data/mockData';
-import type { CreateShiftDto, ShiftTag } from '../../types/roster';
+// import { STAFF } from '../../data/mockData';
+import type { Caregiver, CreateShiftDto, ShiftTag } from '../../types/roster';
+import { DesktopTimePicker } from '@mui/x-date-pickers/DesktopTimePicker';
+import dayjs, { Dayjs } from 'dayjs';
+
+// interface AddShiftModalProps {
+//   participantId: string | null;
+//   caregivers: Caregiver[];
+//   isoDate: string;
+//   onClose: () => void;
+//   onSubmit: (dto: CreateShiftDto) => void;
+// }
 
 interface AddShiftModalProps {
   participantId: string | null;
+  caregivers: Caregiver[];
   isoDate: string;
   onClose: () => void;
-  onSubmit: (dto: CreateShiftDto) => void;
+  onSubmit: (
+    dto: CreateShiftDto
+  ) => Promise<{
+    success: boolean;
+    message?: string;
+  }>;
 }
-
 const TAG_OPTIONS: { value: ShiftTag; label: string }[] = [
   { value: 'assistance', label: 'Assistance' },
   { value: 'transport', label: 'Transport' },
@@ -18,16 +33,63 @@ const TAG_OPTIONS: { value: ShiftTag; label: string }[] = [
   { value: 'nursing', label: 'Nursing' },
 ];
 
-export function AddShiftModal({ participantId, isoDate, onClose, onSubmit }: AddShiftModalProps) {
-  const [staffId, setStaffId] = useState(Object.keys(STAFF)[0]);
-  const [startTime, setStartTime] = useState('9:00AM');
-  const [endTime, setEndTime] = useState('5:00PM');
+export function AddShiftModal({ participantId, isoDate, onClose, onSubmit, caregivers }: AddShiftModalProps) {
+  console.log(caregivers, 'caregivers')
+  // const [staffId, setStaffId] = useState(Object.keys(STAFF)[0]);
+  const [caregiverId, setCaregiverId] = useState('');
+  const [startTime, setStartTime] = useState<Dayjs | null>(dayjs());
+  const [endTime, setEndTime] = useState<Dayjs | null>(dayjs());
+  const [error, setError] = useState<string | null>(null);
   const [tag, setTag] = useState<ShiftTag>('assistance');
   const [hasAlert, setHasAlert] = useState(true);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    onSubmit({ participantId, staffId, date: isoDate, startTime, endTime, tag, hasAlert });
+
+    setError("");
+
+    if (!startTime || !endTime) {
+      setError("Start time and end time are required.");
+      return;
+    }
+
+    if (startTime.isAfter(endTime) || startTime.isSame(endTime)) {
+      setError("Start time must be before end time.");
+      return;
+    }
+
+    if (endTime.diff(startTime, "minute") < 15) {
+      setError("Shift duration must be at least 15 minutes.");
+      return;
+    }
+
+    const startDateTime = dayjs(isoDate)
+      .hour(startTime.hour())
+      .minute(startTime.minute())
+      .second(0)
+      .millisecond(0);
+
+    const endDateTime = dayjs(isoDate)
+      .hour(endTime.hour())
+      .minute(endTime.minute())
+      .second(0)
+      .millisecond(0);
+
+    const result = await onSubmit({
+      participantId,
+      caregiverId: caregiverId || null,
+      date: isoDate,
+      startTime: startDateTime.toISOString(),
+      endTime: endDateTime.toISOString(),
+      tag,
+      hasAlert,
+    });
+
+    if (!result.success) {
+      setError(result.message ?? "Failed creating shift");
+      return;
+    }
+
     onClose();
   }
 
@@ -50,13 +112,16 @@ export function AddShiftModal({ participantId, isoDate, onClose, onSubmit }: Add
           <label className="flex flex-col gap-1.5">
             <span className="text-sm font-medium text-slate-700">Staff member</span>
             <select
-              value={staffId}
-              onChange={(e) => setStaffId(e.target.value)}
+              value={caregiverId}
+              onChange={(e) => setCaregiverId(e.target.value)}
               className="rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-800 focus:border-teal-400 focus:outline-none"
             >
-              {Object.values(STAFF).map((staff) => (
-                <option key={staff.id} value={staff.id}>
-                  {staff.name}
+              {caregivers.map((caregiver) => (
+                <option
+                  key={caregiver.id}
+                  value={caregiver.id}
+                >
+                  {caregiver.name}
                 </option>
               ))}
             </select>
@@ -65,20 +130,34 @@ export function AddShiftModal({ participantId, isoDate, onClose, onSubmit }: Add
           <div className="grid grid-cols-2 gap-3">
             <label className="flex flex-col gap-1.5">
               <span className="text-sm font-medium text-slate-700">Start time</span>
-              <input
+              <DesktopTimePicker
                 value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-                placeholder="9:00AM"
-                className="rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-800 focus:border-teal-400 focus:outline-none"
+                onChange={(newValue) => {
+                  setError("");
+                  setStartTime(newValue);
+                }}
+                slotProps={{
+                  textField: {
+                    size: 'small',
+                    fullWidth: true,
+                  },
+                }}
               />
             </label>
             <label className="flex flex-col gap-1.5">
               <span className="text-sm font-medium text-slate-700">End time</span>
-              <input
+              <DesktopTimePicker
                 value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
-                placeholder="5:00PM"
-                className="rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-800 focus:border-teal-400 focus:outline-none"
+                onChange={(newValue) => {
+                  setError("");
+                  setEndTime(newValue);
+                }}
+                slotProps={{
+                  textField: {
+                    size: 'small',
+                    fullWidth: true,
+                  },
+                }}
               />
             </label>
           </div>
@@ -107,7 +186,11 @@ export function AddShiftModal({ participantId, isoDate, onClose, onSubmit }: Add
             />
             Flag for review
           </label>
-
+          {error && (
+            <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-700">
+              {error}
+            </div>
+          )}
           <div className="mt-2 flex justify-end gap-3">
             <button
               type="button"

@@ -8,7 +8,9 @@ import { getWeekStart, nextWeek, prevWeek } from './utils/week';
 export default function App() {
   const [view, setView] = useState<'personal' | 'company'>('company');
   const [activeNav, setActiveNav] = useState('Rostering');
-  const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date('2026-02-23')));
+  const [weekStart, setWeekStart] = useState(() =>
+    getWeekStart(new Date())
+  );
 
   return (
     <div className="flex h-screen flex-col bg-slate-50 text-slate-900">

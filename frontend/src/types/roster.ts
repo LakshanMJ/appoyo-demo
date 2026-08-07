@@ -9,17 +9,30 @@ export interface Staff {
   avatarUrl?: string;
 }
 
+export interface Caregiver {
+  id: string;
+  name: string;
+  avatarUrl?: string;
+}
+
 export interface Participant {
   id: string;
   name: string;
-  allocatedBudgetCents: number;
-  usedBudgetCents: number;
+  allocatedBudget: number;
+  usedBudget: number;
 }
 
+export type ShiftType =
+  | 'assistance'
+  | 'transport'
+  | 'domestic'
+  | 'community'
+  | 'nursing';
+  
 export interface Shift {
   id: string;
   participantId: string | null; // null = vacant / unassigned shift row
-  staffId: string;
+  caregiverId: string | null;
   date: string; // ISO date, e.g. "2026-02-23"
   startTime: string; // "07:00"
   endTime: string; // "20:00"
@@ -40,7 +53,7 @@ export interface RosterWeek {
 
 export interface CreateShiftDto {
   participantId: string | null;
-  staffId: string;
+  caregiverId: string | null;
   date: string;
   startTime: string;
   endTime: string;

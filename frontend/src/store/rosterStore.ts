@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { MOCK_SHIFTS, MOCK_VACANT_SHIFTS, PARTICIPANTS, STAFF } from '../data/mockData';
 import { rosterApi } from '../api/apiClient';
-import type { CreateShiftDto, Participant, Shift, Staff } from '../types/roster';
+import type { Caregiver, CreateShiftDto, Participant, Shift } from '../types/roster';
+import axios from 'axios';
 
 // Toggle this to false once your NestJS endpoints are live —
 // it lets the frontend be built and demoed independently of the backend.
@@ -11,24 +12,151 @@ interface RosterStore {
   participants: Participant[];
   shifts: Shift[];
   vacantShifts: Shift[];
+  caregivers: Caregiver[];
   isLoading: boolean;
 
   loadWeek: (weekStartIso: string) => Promise<void>;
-  getStaff: (staffId: string) => Staff;
+  loadCaregivers: () => Promise<void>;
+  loadParticipants: () => Promise<void>;
+  loadShifts: (startDate: string, endDate: string) => Promise<void>;
+  createParticipant: (data: {
+    name: string;
+    phone?: string;
+    address?: string;
+    allocatedBudget?: number;
+  }) => Promise<void>;
 
   moveShift: (shiftId: string, targetParticipantId: string | null, targetDate: string) => Promise<void>;
-  createShift: (dto: CreateShiftDto) => Promise<void>;
+  createShift: (
+    dto: CreateShiftDto
+  ) => Promise<{
+    success: boolean;
+    message?: string;
+  }>;
   duplicateShift: (shift: Shift) => Promise<void>;
-  addParticipant: (name: string) => void;
 }
 
 export const useRosterStore = create<RosterStore>((set, get) => ({
-  participants: PARTICIPANTS,
+  // participants: PARTICIPANTS,
+  participants: [],
   shifts: MOCK_SHIFTS,
   vacantShifts: MOCK_VACANT_SHIFTS,
+  caregivers: [],
   isLoading: false,
 
-  // 1
+  // 1 - working
+  loadCaregivers: async () => {
+    try {
+      const caregivers = await rosterApi.caregivers.getAll();
+      set({
+        caregivers,
+      });
+    } catch (error) {
+      console.error(
+        "Failed loading caregivers",
+        error
+      );
+    }
+  },
+
+  //2 - working
+  createParticipant: async (data) => {
+    try {
+      const participant = await rosterApi.participants.create(data);
+      set((state) => ({
+        participants: [
+          ...state.participants,
+          participant,
+        ],
+      }));
+    } catch (error) {
+      console.error("Failed to create participant", error);
+    }
+  },
+
+  // 3 - working
+  loadParticipants: async () => {
+    try {
+      const participants = await rosterApi.participants.getAll();
+      set({
+        participants,
+      });
+    } catch (error) {
+      console.error("Failed to load participants", error);
+    }
+  },
+
+  // 4 - working
+  createShift: async (dto) => {
+    const tempId = `temp-${Date.now()}`;
+    const optimisticShift: Shift = {
+      ...dto,
+      id: tempId,
+      hasAlert: dto.hasAlert ?? false,
+      colorKey: dto.caregiverId ?? '',
+    };
+    set((state) =>
+      dto.participantId
+        ? { shifts: [...state.shifts, optimisticShift] }
+        : { vacantShifts: [...state.vacantShifts, optimisticShift] },
+    );
+    try {
+      const created = await rosterApi.shifts.create(dto);
+      const normalizedShift: Shift = {
+        ...created,
+        hasAlert: dto.hasAlert ?? false,
+        colorKey: created.caregiverId ?? "unassigned",
+        date: dto.date,
+      };
+      set((state) => ({
+        shifts: state.shifts.map((s) =>
+          s.id === tempId ? normalizedShift : s
+        ),
+        vacantShifts: state.vacantShifts.map((s) =>
+          s.id === tempId ? normalizedShift : s
+        ),
+      }));
+      return {
+        success: true,
+      };
+    } catch (err) {
+      console.error(err);
+      set((state) => ({
+        shifts: state.shifts.filter((s) => s.id !== tempId),
+        vacantShifts: state.vacantShifts.filter((s) => s.id !== tempId),
+      }));
+      if (axios.isAxiosError(err)) {
+        return {
+          success: false,
+          message:
+            err.response?.data?.message ??
+            "Failed to create shift",
+        };
+      }
+      return {
+        success: false,
+        message: "Unexpected error occurred",
+      };
+    }
+  },
+
+  // get the shifts for the current week and update the store
+  loadShifts: async (startDate, endDate) => {
+    try {
+      const shifts = await rosterApi.shifts.getAll(
+        startDate,
+        endDate
+      );
+      set({
+        shifts: shifts.filter((s) => s.participantId),
+        vacantShifts: shifts.filter((s) => !s.participantId),
+      });
+    } catch (error) {
+      console.error('Failed loading shifts', error);
+    }
+  },
+
+
   loadWeek: async (weekStartIso) => {
     if (USE_MOCK_DATA) return; // mock data is already loaded synchronously
     set({ isLoading: true });
@@ -81,32 +209,7 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
     }
   },
 
-  // 4
-  createShift: async (dto) => {
-    const tempId = `temp-${Date.now()}`;
-    const optimisticShift: Shift = { ...dto, id: tempId, hasAlert: dto.hasAlert ?? true, colorKey: dto.staffId };
 
-    set((state) =>
-      dto.participantId
-        ? { shifts: [...state.shifts, optimisticShift] }
-        : { vacantShifts: [...state.vacantShifts, optimisticShift] },
-    );
-
-    if (USE_MOCK_DATA) return;
-    try {
-      const created = await rosterApi.createShift(dto);
-      set((state) => ({
-        shifts: state.shifts.map((s) => (s.id === tempId ? created : s)),
-        vacantShifts: state.vacantShifts.map((s) => (s.id === tempId ? created : s)),
-      }));
-    } catch (err) {
-      console.error('Failed to create shift, rolling back', err);
-      set((state) => ({
-        shifts: state.shifts.filter((s) => s.id !== tempId),
-        vacantShifts: state.vacantShifts.filter((s) => s.id !== tempId),
-      }));
-    }
-  },
 
   // 5
   duplicateShift: async (shift) => {
