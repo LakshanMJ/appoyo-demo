@@ -7,12 +7,7 @@ import { CreateShiftDto } from './dto/create-shift.dto';
 
 @Controller('shifts')
 export class ShiftsController {
-  constructor(private readonly shiftsService: ShiftsService) {}
-
-  // @Get()
-  // findAll(@Query() query: GetShiftsDto) {
-  //   return this.shiftsService.findAll(query);
-  // }
+  constructor(private readonly shiftsService: ShiftsService) { }
 
   // @Get(':id')
   // findOne(@Param('id') id: string) {
@@ -29,6 +24,18 @@ export class ShiftsController {
     return this.shiftsService.create(dto);
   }
 
+  // @Get()
+  // findAll() {
+  //   return this.shiftsService.findAll();
+  // }
+
+  @Get()
+  findAll(
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
+  ) {
+    return this.shiftsService.findAll(startDate, endDate);
+  }
   // @Patch(':id')
   // update(@Param('id') id: string, @Body() dto: UpdateShiftDto) {
   //   return this.shiftsService.update(id, dto);

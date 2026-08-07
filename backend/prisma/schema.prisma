@@ -22,11 +22,11 @@ enum ShiftCategory {
 }
 
 enum ShiftType {
-  ASSISTANCE
-  NURSING
-  TRAVEL_TRANSPORT
-  MEAL_PREP
-  DOMESTIC
+  assistance
+  transport
+  domestic
+  community
+  nursing
 }
 
 enum ShiftStatus {
@@ -36,25 +36,8 @@ enum ShiftStatus {
   COMPLETED
 }
 
-model Organization {
-  id   String @id @default(uuid())
-  name String
-
-  users        User[]
-  participants Participant[]
-  caregivers   Caregiver[]
-  shifts       Shift[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([name])
-}
-
 model User {
   id             String       @id @default(uuid())
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   name     String
   email    String   @unique
@@ -66,32 +49,27 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([organizationId])
   @@index([role])
 }
 
 model Participant {
   id             String       @id @default(uuid())
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   name    String
   phone   String?
   address String?
-
+  allocatedBudget Int @default(0)
+  
   shifts Shift[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([organizationId])
   @@index([name])
 }
 
 model Caregiver {
   id             String       @id @default(uuid())
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   userId String? @unique // Added @unique for 1:1 relation consistency
   user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
@@ -104,17 +82,14 @@ model Caregiver {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([organizationId])
   @@index([name])
 }
 
 model Shift {
   id             String       @id @default(uuid())
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
-  participantId String
-  participant   Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  participantId String?
+  participant   Participant? @relation(fields: [participantId], references: [id], onDelete: SetNull)
 
   caregiverId String? // Nullable for Vacant Shifts
   caregiver   Caregiver? @relation(fields: [caregiverId], references: [id], onDelete: SetNull)
@@ -123,7 +98,7 @@ model Shift {
   endTime   DateTime
 
   category ShiftCategory @default(PERSONAL_CARE)
-  type     ShiftType     @default(ASSISTANCE)
+  type     ShiftType     @default(assistance)
 
   badgeText String?
   badgeIcon String?
@@ -135,9 +110,9 @@ model Shift {
   updatedAt DateTime @updatedAt
 
   // Composite Indexes for Query Optimization
-  @@index([organizationId, startTime, endTime])
+  @@index([startTime, endTime])
   @@index([caregiverId, startTime, endTime])
   @@index([participantId, startTime, endTime])
-  @@index([organizationId, status])
-  @@index([organizationId, category])
+  @@index([status])
+  @@index([category])
 }

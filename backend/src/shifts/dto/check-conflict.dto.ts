@@ -11,7 +11,7 @@ export class CheckConflictDto {
 
   @IsString()
   @IsNotEmpty()
-  participantId!: string;
+  participantId?: string;
 
   @IsString()
   @IsOptional()

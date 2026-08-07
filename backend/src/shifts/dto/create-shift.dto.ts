@@ -4,11 +4,7 @@ import { ShiftCategory, ShiftType, ShiftStatus } from '@prisma/client';
 export class CreateShiftDto {
   @IsString()
   @IsNotEmpty()
-  organizationId!: string;
-
-  @IsString()
-  @IsNotEmpty()
-  participantId!: string;
+  participantId?: string;
 
   @IsString()
   @IsOptional()

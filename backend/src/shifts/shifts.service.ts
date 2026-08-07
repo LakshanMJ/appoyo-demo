@@ -7,9 +7,56 @@ import type { CheckConflictDto } from './dto/check-conflict.dto';
 
 @Injectable()
 export class ShiftsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
-  // 1. Fetch shifts within calendar date window
+  // 1. Create Shift
+  async create(dto: CreateShiftDto) {
+    const conflictResult = await this.checkConflict({
+      startTime: dto.startTime,
+      endTime: dto.endTime,
+      participantId: dto.participantId,
+      caregiverId: dto.caregiverId,
+    });
+
+    if (conflictResult.hasConflict) {
+      throw new BadRequestException(conflictResult.message);
+    }
+
+    return this.prisma.shift.create({
+      data: {
+        participantId: dto.participantId ?? null,
+        caregiverId: dto.caregiverId ?? null,
+        startTime: new Date(dto.startTime),
+        endTime: new Date(dto.endTime),
+        category: dto.category,
+        type: dto.type,
+        badgeText: dto.badgeText,
+        badgeIcon: dto.badgeIcon,
+        status: dto.status,
+        notes: dto.notes,
+      },
+      include: { participant: true, caregiver: true },
+    });
+  }
+
+
+  // 3. Fetch shifts within calendar date window
+  async findAll(startDate: string, endDate: string) {
+    return this.prisma.shift.findMany({
+      where: {
+        startTime: {
+          gte: new Date(startDate),
+          lt: new Date(endDate),
+        },
+      },
+      include: {
+        participant: true,
+        caregiver: true,
+      },
+    });
+  }
+
+  
   // async findAll(query: GetShiftsDto) {
   //   const { startDate, endDate, organizationId } = query;
 
@@ -43,92 +90,47 @@ export class ShiftsService {
   //   return shift;
   // }
 
-  // 3. Standalone conflict check method
+  // Standalone conflict check method.................................................................
+
   async checkConflict(dto: CheckConflictDto) {
     const start = new Date(dto.startTime);
     const end = new Date(dto.endTime);
-
     if (start >= end) {
-      throw new BadRequestException('Shift start time must be before end time.');
+      throw new BadRequestException(
+        'Shift start time must be before end time.',
+      );
     }
-
-    // Caregiver conflict check
     if (dto.caregiverId) {
-      const caregiverConflict = await this.prisma.shift.findFirst({
-        where: {
-          id: dto.excludeShiftId ? { not: dto.excludeShiftId } : undefined,
-          caregiverId: dto.caregiverId,
-          OR: [
-            { startTime: { lte: start }, endTime: { gt: start } },
-            { startTime: { lt: end }, endTime: { gte: end } },
-            { startTime: { gte: start }, endTime: { lte: end } },
-          ],
-        },
-      });
-
+      const caregiverConflict =
+        await this.prisma.shift.findFirst({
+          where: {
+            id: dto.excludeShiftId
+              ? { not: dto.excludeShiftId }
+              : undefined,
+            caregiverId: dto.caregiverId,
+            startTime: {
+              lt: end,
+            },
+            endTime: {
+              gt: start,
+            },
+          },
+        });
       if (caregiverConflict) {
         return {
           hasConflict: true,
           type: 'CAREGIVER_OVERLAP',
-          message: 'Caregiver is already assigned to another shift in this time slot.',
+          message:
+            'Caregiver is already assigned to another shift in this time slot.',
         };
       }
     }
-
-    // Participant conflict check
-    const participantConflict = await this.prisma.shift.findFirst({
-      where: {
-        id: dto.excludeShiftId ? { not: dto.excludeShiftId } : undefined,
-        participantId: dto.participantId,
-        OR: [
-          { startTime: { lte: start }, endTime: { gt: start } },
-          { startTime: { lt: end }, endTime: { gte: end } },
-          { startTime: { gte: start }, endTime: { lte: end } },
-        ],
-      },
-    });
-
-    if (participantConflict) {
-      return {
-        hasConflict: true,
-        type: 'PARTICIPANT_OVERLAP',
-        message: 'Participant already has an active shift scheduled in this time slot.',
-      };
-    }
-
-    return { hasConflict: false, message: 'No conflicts detected.' };
+    return {
+      hasConflict: false,
+    };
   }
 
-  // 4. Create Shift
-  async create(dto: CreateShiftDto) {
-    const conflictResult = await this.checkConflict({
-      startTime: dto.startTime,
-      endTime: dto.endTime,
-      participantId: dto.participantId,
-      caregiverId: dto.caregiverId,
-    });
 
-    if (conflictResult.hasConflict) {
-      throw new BadRequestException(conflictResult.message);
-    }
-
-    return this.prisma.shift.create({
-      data: {
-        organizationId: dto.organizationId,
-        participantId: dto.participantId,
-        caregiverId: dto.caregiverId || null,
-        startTime: new Date(dto.startTime),
-        endTime: new Date(dto.endTime),
-        category: dto.category,
-        type: dto.type,
-        badgeText: dto.badgeText,
-        badgeIcon: dto.badgeIcon,
-        status: dto.status,
-        notes: dto.notes,
-      },
-      include: { participant: true, caregiver: true },
-    });
-  }
 
   // 5. Update Shift (Handles Drag & Drop or Resizing)
   // async update(id: string, dto: UpdateShiftDto) {

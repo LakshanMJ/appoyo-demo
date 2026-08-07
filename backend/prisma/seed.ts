@@ -1,4 +1,10 @@
-import { PrismaClient, ShiftCategory, ShiftType, ShiftStatus, UserRole } from '@prisma/client';
+import {
+  PrismaClient,
+  ShiftCategory,
+  ShiftType,
+  ShiftStatus,
+  UserRole,
+} from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -8,37 +14,38 @@ async function main() {
   await prisma.caregiver.deleteMany();
   await prisma.user.deleteMany();
   await prisma.participant.deleteMany();
-  await prisma.organization.deleteMany();
 
-  // 2. Create Organization
-  const org = await prisma.organization.create({
-    data: { name: 'Appoyo HQ' },
-  });
-
-  // 3. Create Participants
+  // 2. Create Participants
   const arjun = await prisma.participant.create({
-    data: { organizationId: org.id, name: 'Arjun Patel' },
-  });
-  const chloe = await prisma.participant.create({
-    data: { organizationId: org.id, name: 'Chloe Thompson' },
-  });
-  const danielle = await prisma.participant.create({
-    data: { organizationId: org.id, name: 'Danielle Smith' },
+    data: {
+      name: 'Hank Moody',
+    },
   });
 
-  // Helper function to create Caregivers with Users
+  const chloe = await prisma.participant.create({
+    data: {
+      name: 'Chuck Runkle',
+    },
+  });
+
+  const danielle = await prisma.participant.create({
+    data: {
+      name: 'Hunter Smith',
+    },
+  });
+
+  // 3. Helper function to create Caregivers
   const createCaregiver = async (name: string, email: string) => {
     const user = await prisma.user.create({
       data: {
-        organizationId: org.id,
         name,
         email,
         role: UserRole.CAREGIVER,
       },
     });
+
     return prisma.caregiver.create({
       data: {
-        organizationId: org.id,
         userId: user.id,
         name,
       },
@@ -46,83 +53,102 @@ async function main() {
   };
 
   // 4. Create Caregivers
-  const ethan = await createCaregiver('Ethan Taylor', 'ethan@appoyo.com');
-  const ava = await createCaregiver('Ava Williams', 'ava@appoyo.com');
-  const noah = await createCaregiver('Noah Harris', 'noah@appoyo.com');
-  const isla = await createCaregiver('Isla Campbell', 'isla@appoyo.com');
+  const ethan = await createCaregiver(
+    'Ethan Taylor',
+    'ethan@appoyo.com',
+  );
 
-  // 5. Create Baseline Shifts (Anchor dates to current week)
+  const ava = await createCaregiver(
+    'Ava Williams',
+    'ava@appoyo.com',
+  );
+
+  const noah = await createCaregiver(
+    'Noah Harris',
+    'noah@appoyo.com',
+  );
+
+  const isla = await createCaregiver(
+    'Isla Campbell',
+    'isla@appoyo.com',
+  );
+
+  // 5. Helper for creating shift dates
   const today = new Date();
+
   const getShiftDate = (dayOffset: number, hour: number) => {
-    const d = new Date(today);
-    d.setDate(d.getDate() + dayOffset);
-    d.setHours(hour, 0, 0, 0);
-    return d;
+    const date = new Date(today);
+
+    date.setDate(date.getDate() + dayOffset);
+    date.setHours(hour, 0, 0, 0);
+
+    return date;
   };
 
+
+  // 6. Create baseline shifts
   await prisma.shift.createMany({
     data: [
-      // Arjun's Shifts
+      // Arjun - Ethan: 7 AM - 8 PM
       {
-        organizationId: org.id,
         participantId: arjun.id,
         caregiverId: ethan.id,
         startTime: getShiftDate(0, 7),
         endTime: getShiftDate(0, 20),
-        category: ShiftCategory.PERSONAL_CARE, // Pink
-        type: ShiftType.ASSISTANCE,
-        badgeText: 'Assistance',
-        badgeIcon: 'shield',
-        status: ShiftStatus.CONFIRMED,
-      },
-      {
-        organizationId: org.id,
-        participantId: arjun.id,
-        caregiverId: ava.id,
-        startTime: getShiftDate(0, 8),
-        endTime: getShiftDate(0, 10),
-        category: ShiftCategory.DOMESTIC, // Yellow
-        type: ShiftType.ASSISTANCE,
+        category: ShiftCategory.PERSONAL_CARE,
+        type: ShiftType.assistance,
         badgeText: 'Assistance',
         badgeIcon: 'shield',
         status: ShiftStatus.CONFIRMED,
       },
 
-      // Chloe's Shifts
+      // Arjun - Ava: 8 AM - 10 AM
       {
-        organizationId: org.id,
+        participantId: arjun.id,
+        caregiverId: ava.id,
+        startTime: getShiftDate(0, 8),
+        endTime: getShiftDate(0, 10),
+        category: ShiftCategory.DOMESTIC,
+        type: ShiftType.assistance,
+        badgeText: 'Assistance',
+        badgeIcon: 'shield',
+        status: ShiftStatus.CONFIRMED,
+      },
+
+      // Chloe - Noah: 7 AM - 8 AM
+      {
         participantId: chloe.id,
         caregiverId: noah.id,
         startTime: getShiftDate(1, 7),
         endTime: getShiftDate(1, 8),
-        category: ShiftCategory.CLINICAL, // Lavender
-        type: ShiftType.NURSING,
+        category: ShiftCategory.CLINICAL,
+        type: ShiftType.nursing,
         badgeText: 'Nursing',
         badgeIcon: 'shield',
         status: ShiftStatus.CONFIRMED,
       },
+
+      // Chloe - Isla: 4 PM - 9 PM
       {
-        organizationId: org.id,
         participantId: chloe.id,
         caregiverId: isla.id,
         startTime: getShiftDate(2, 16),
         endTime: getShiftDate(2, 21),
-        category: ShiftCategory.COMMUNITY, // Teal
-        type: ShiftType.TRAVEL_TRANSPORT,
+        category: ShiftCategory.COMMUNITY,
+        type: ShiftType.transport,
         badgeText: 'Transport',
         badgeIcon: 'car',
         status: ShiftStatus.CONFIRMED,
       },
 
-      // Vacant Shift (No caregiverId)
+      // Arjun - Vacant: 9 AM - 12 PM
       {
-        organizationId: org.id,
         participantId: arjun.id,
         caregiverId: null,
         startTime: getShiftDate(3, 9),
         endTime: getShiftDate(3, 12),
         category: ShiftCategory.PERSONAL_CARE,
-        type: ShiftType.ASSISTANCE,
+        type: ShiftType.assistance,
         badgeText: 'Vacant Shift',
         badgeIcon: 'alert',
         status: ShiftStatus.PENDING_APPROVAL,
@@ -134,8 +160,8 @@ async function main() {
 }
 
 main()
-  .catch((e) => {
-    console.error(e);
+  .catch((error) => {
+    console.error('Seed failed:', error);
     process.exit(1);
   })
   .finally(async () => {
