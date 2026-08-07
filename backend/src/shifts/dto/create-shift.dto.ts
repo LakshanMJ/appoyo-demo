@@ -1,10 +1,14 @@
-import { IsEnum, IsNotEmpty, IsOptional, IsString, IsDateString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString, IsDateString, IsUUID } from 'class-validator';
 import { ShiftCategory, ShiftType, ShiftStatus } from '@prisma/client';
 
 export class CreateShiftDto {
-  @IsString()
-  @IsNotEmpty()
-  participantId?: string;
+  // @IsString()
+  // @IsNotEmpty()
+  // participantId?: string | null;
+
+  @IsOptional()
+  @IsUUID()
+  participantId?: string | null;
 
   @IsString()
   @IsOptional()

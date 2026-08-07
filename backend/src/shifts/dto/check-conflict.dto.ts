@@ -1,4 +1,4 @@
-import { IsDateString, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsDateString, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class CheckConflictDto {
   @IsDateString()
@@ -9,9 +9,12 @@ export class CheckConflictDto {
   @IsNotEmpty()
   endTime!: string;
 
-  @IsString()
-  @IsNotEmpty()
-  participantId?: string;
+  // @IsString()
+  // @IsNotEmpty()
+  // participantId?: string;
+  @IsOptional()
+  @IsUUID()
+  participantId?: string | null;
 
   @IsString()
   @IsOptional()
