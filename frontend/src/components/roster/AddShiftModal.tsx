@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import type {
   Caregiver,
   CreateShiftDto,
+  Shift,
   ShiftType,
 } from '../../types/roster';
 
@@ -22,9 +23,22 @@ interface AddShiftModalProps {
   participants: { id: string; name: string }[];
   isoDate: string;
 
+  // Pass the shift being edited to switch the modal into edit mode.
+  // Omit (or pass undefined) for create mode.
+  editingShift?: Shift | null;
+
   onClose: () => void;
 
   onSubmit: (
+    dto: CreateShiftDto
+  ) => Promise<{
+    success: boolean;
+    message?: string;
+  }>;
+
+  // Called instead of onSubmit when editingShift is provided.
+  onUpdate?: (
+    shiftId: string,
     dto: CreateShiftDto
   ) => Promise<{
     success: boolean;
@@ -36,36 +50,25 @@ const TYPE_OPTIONS: {
   value: ShiftType;
   label: string;
 }[] = [
-  {
-    value: 'assistance',
-    label: 'Assistance',
-  },
-  {
-    value: 'transport',
-    label: 'Transport',
-  },
-  {
-    value: 'domestic',
-    label: 'Domestic',
-  },
-  {
-    value: 'community',
-    label: 'Community Access',
-  },
-  {
-    value: 'nursing',
-    label: 'Nursing',
-  },
+  { value: 'assistance', label: 'Assistance' },
+  { value: 'transport', label: 'Transport' },
+  { value: 'domestic', label: 'Domestic' },
+  { value: 'community', label: 'Community Access' },
+  { value: 'nursing', label: 'Nursing' },
 ];
 
 export function AddShiftModal({
   participantId,
   isoDate,
+  editingShift,
   onClose,
   onSubmit,
+  onUpdate,
   caregivers,
   participants,
 }: AddShiftModalProps) {
+  const isEditMode = Boolean(editingShift);
+
   const [caregiverId, setCaregiverId] = useState('');
   const [selectedParticipantId, setSelectedParticipantId] =
     useState(participantId ?? '');
@@ -75,10 +78,31 @@ export function AddShiftModal({
 
   const [error, setError] = useState<string | null>(null);
 
-  const [type, setType] =
-    useState<ShiftType>('assistance');
+  const [type, setType] = useState<ShiftType>('assistance');
 
   const [hasAlert, setHasAlert] = useState(true);
+
+  // The roster day this shift belongs to. In create mode this is
+  // fixed to the day the user clicked. In edit mode we derive it
+  // from the shift's own start time so we don't accidentally move
+  // the shift to a different day just by opening the modal.
+  const [shiftDate, setShiftDate] = useState(isoDate);
+
+  // Pre-fill the form when editing an existing shift.
+  useEffect(() => {
+    if (!editingShift) return;
+
+    const startLocal = dayjs(editingShift.startTime).tz(ORG_TZ);
+    const endLocal = dayjs(editingShift.endTime).tz(ORG_TZ);
+
+    setCaregiverId(editingShift.caregiverId ?? '');
+    setSelectedParticipantId(editingShift.participantId ?? '');
+    setStartTime(startLocal);
+    setEndTime(endLocal);
+    setType(editingShift.type as ShiftType);
+    setHasAlert(Boolean(editingShift.hasAlert));
+    setShiftDate(startLocal.format('YYYY-MM-DD'));
+  }, [editingShift]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -104,10 +128,12 @@ export function AddShiftModal({
     }
 
     /*
-     * isoDate is the roster day the user clicked.
+     * shiftDate is the roster day this shift belongs to — the day
+     * the user clicked (create mode) or the shift's original day
+     * (edit mode).
      *
      * Example:
-     * isoDate = "2026-08-05"
+     * shiftDate = "2026-08-05"
      * startTime = "09:00"
      *
      * This creates:
@@ -116,13 +142,13 @@ export function AddShiftModal({
      * Then toISOString() converts it to UTC for the backend.
      */
     const startDateTime = dayjs.tz(
-      `${isoDate} ${startTime.format('HH:mm:ss')}`,
+      `${shiftDate} ${startTime.format('HH:mm:ss')}`,
       'YYYY-MM-DD HH:mm:ss',
       ORG_TZ
     );
 
     const endDateTime = dayjs.tz(
-      `${isoDate} ${endTime.format('HH:mm:ss')}`,
+      `${shiftDate} ${endTime.format('HH:mm:ss')}`,
       'YYYY-MM-DD HH:mm:ss',
       ORG_TZ
     );
@@ -130,21 +156,12 @@ export function AddShiftModal({
     const finalParticipantId =
       participantId ?? selectedParticipantId;
 
-    console.log('CREATING SHIFT:', {
-      rosterDate: isoDate,
-      startLocal: startDateTime.format(),
-      startUTC: startDateTime.toISOString(),
-      endLocal: endDateTime.format(),
-      endUTC: endDateTime.toISOString(),
+    const dto: CreateShiftDto = {
       participantId: finalParticipantId || null,
-    });
-
-    const result = await onSubmit({
-      participantId: participantId || null,
       caregiverId: caregiverId || null,
 
       // Keep the roster date too if your DTO supports it.
-      date: isoDate,
+      date: shiftDate,
 
       // Store UTC in backend.
       startTime: startDateTime.toISOString(),
@@ -152,11 +169,26 @@ export function AddShiftModal({
 
       type,
       hasAlert,
+    };
+
+    console.log(isEditMode ? 'UPDATING SHIFT:' : 'CREATING SHIFT:', {
+      rosterDate: shiftDate,
+      startLocal: startDateTime.format(),
+      startUTC: startDateTime.toISOString(),
+      endLocal: endDateTime.format(),
+      endUTC: endDateTime.toISOString(),
+      participantId: finalParticipantId || null,
     });
 
-    if (!result.success) {
+    const result =
+      isEditMode && editingShift
+        ? await onUpdate?.(editingShift.id, dto)
+        : await onSubmit(dto);
+
+    if (!result?.success) {
       setError(
-        result.message ?? 'Failed creating shift'
+        result?.message ??
+          (isEditMode ? 'Failed updating shift' : 'Failed creating shift')
       );
       return;
     }
@@ -169,7 +201,7 @@ export function AddShiftModal({
       <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl">
         <div className="mb-5 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-slate-800">
-            Add Shift
+            {isEditMode ? 'Edit Shift' : 'Add Shift'}
           </h2>
 
           <button
@@ -182,7 +214,7 @@ export function AddShiftModal({
         </div>
 
         <p className="mb-4 text-sm text-slate-500">
-          {isoDate}
+          {shiftDate}
           {participantId ? '' : ' · Vacant shift'}
         </p>
 
@@ -316,7 +348,7 @@ export function AddShiftModal({
               type="submit"
               className="rounded-lg bg-fuchsia-800 px-4 py-2.5 text-sm font-medium text-white hover:bg-fuchsia-900"
             >
-              Create shift
+              {isEditMode ? 'Save changes' : 'Create shift'}
             </button>
           </div>
         </form>

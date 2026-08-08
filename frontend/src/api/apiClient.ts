@@ -27,6 +27,10 @@ export const rosterApi = {
       });
       return response.data;
     },
+    delete: async (shiftId: string) => {
+      const response = await api.delete(`/shifts/${shiftId}`);
+      return response.data;
+    },
     moveShift: async (data) => {
       const response = await api.patch(
         `/shifts/${data.shiftId}/move`,
@@ -36,7 +40,13 @@ export const rosterApi = {
           endTime: data.endTime,
         },
       );
-
+      return response.data;
+    },
+    update: async (shiftId, dto) => {
+      const response = await api.patch(
+        `/shifts/${shiftId}`,
+        dto
+      );
       return response.data;
     },
   },

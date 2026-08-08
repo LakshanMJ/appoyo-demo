@@ -10,20 +10,41 @@ import { AddParticipantRow } from './AddParticipantRow';
 import { AddShiftModal } from './AddShiftModal';
 import { ShiftCard } from './ShiftCard';
 import { AddParticipantModal } from './AddParticipantModal';
+import { DeleteShiftModal } from './DeleteShiftModal';
 
 interface RosterGridProps {
   weekStart: Date;
 }
 
+type ModalTarget = {
+  participantId: string | null;
+  isoDate: string;
+  editingShift?: Shift;
+};
+
 export function RosterGrid({ weekStart }: RosterGridProps) {
   const days = getWeekColumns(weekStart);
 
-  const { loadCaregivers, caregivers, loadParticipants, participants, loadShifts, shifts, vacantShifts, moveShift, createShift, duplicateShift, createParticipant } =
-    useRosterStore();
-    // console.log(vacantShifts,'vacantShiftszzzz')
+  const {
+    loadCaregivers,
+    caregivers,
+    loadParticipants,
+    participants,
+    loadShifts,
+    shifts,
+    vacantShifts,
+    moveShift,
+    createShift,
+    updateShift,
+    deleteShift,
+    duplicateShift,
+    createParticipant
+  } = useRosterStore();
+
   const [activeShift, setActiveShift] = useState<Shift | null>(null);
-  const [modalTarget, setModalTarget] = useState<{ participantId: string | null; isoDate: string } | null>(null);
+  const [modalTarget, setModalTarget] = useState<ModalTarget | null>(null);
   const [showParticipantModal, setShowParticipantModal] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Shift | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -38,11 +59,21 @@ export function RosterGrid({ weekStart }: RosterGridProps) {
     setActiveShift(null);
     const { active, over } = event;
     if (!over) return;
-
     const dropData = over.data.current as { participantId: string | null; isoDate: string } | undefined;
     if (!dropData) return;
-
     moveShift(active.id as string, dropData.participantId, dropData.isoDate);
+  }
+
+  const handleEditShift = (shift: Shift) => {
+    setModalTarget({
+      participantId: shift.participantId,
+      isoDate: shift.date,
+      editingShift: shift,
+    });
+  };
+
+  function handleDeleteShift(shift: Shift) {
+    setDeleteTarget(shift);
   }
 
   useEffect(() => {
@@ -72,6 +103,8 @@ export function RosterGrid({ weekStart }: RosterGridProps) {
                 isoDate: date,
               })
             }
+            onEditShift={handleEditShift}
+            onDeleteShift={handleDeleteShift}
             onDuplicateShift={duplicateShift}
             onShiftClick={() => { }}
           />
@@ -88,6 +121,8 @@ export function RosterGrid({ weekStart }: RosterGridProps) {
               onAddShift={(pId, date) =>
                 setModalTarget({ participantId: pId, isoDate: date })
               }
+              onEditShift={handleEditShift}
+              onDeleteShift={handleDeleteShift}
               onDuplicateShift={duplicateShift}
               onShiftClick={() => { }}
             />
@@ -100,10 +135,6 @@ export function RosterGrid({ weekStart }: RosterGridProps) {
           />
         </div>
       </div>
-
-      {/* <DragOverlay>
-        {activeShift ? <ShiftCard shift={activeShift} staff={getStaff(activeShift.staffId)} /> : null}
-      </DragOverlay> */}
 
       <DragOverlay>
         {activeShift ? (
@@ -126,8 +157,10 @@ export function RosterGrid({ weekStart }: RosterGridProps) {
           caregivers={caregivers}
           participantId={modalTarget.participantId}
           isoDate={modalTarget.isoDate}
+          editingShift={modalTarget.editingShift}
           onClose={() => setModalTarget(null)}
           onSubmit={createShift}
+          onUpdate={updateShift}
         />
       )}
 
@@ -137,6 +170,15 @@ export function RosterGrid({ weekStart }: RosterGridProps) {
           onSubmit={createParticipant}
         />
       )}
+
+      {deleteTarget && (
+        <DeleteShiftModal
+          shift={deleteTarget}
+          onClose={() => setDeleteTarget(null)}
+          onConfirm={deleteShift}
+        />
+      )}
+
     </DndContext>
   );
 }

@@ -19,6 +19,8 @@ interface ParticipantRowProps {
   shifts: Shift[];
   loadCaregivers: (caregiverId: string) => Staff | undefined;
   onAddShift: (participantId: string | null, isoDate: string) => void;
+  onEditShift: (shift: Shift) => void;
+  onDeleteShift: (shift: Shift) => void;
   onDuplicateShift: (shift: Shift) => void;
   onShiftClick: (shift: Shift) => void;
 }
@@ -45,6 +47,8 @@ export function ParticipantRow({
   shifts,
   loadCaregivers,
   onAddShift,
+  onEditShift,
+  onDeleteShift,
   onDuplicateShift,
   onShiftClick,
 }: ParticipantRowProps) {
@@ -70,6 +74,8 @@ export function ParticipantRow({
             )}
             loadCaregivers={loadCaregivers}
             onAddShift={onAddShift}
+            onEditShift={onEditShift}
+            onDeleteShift={onDeleteShift}
             onDuplicateShift={onDuplicateShift}
             onShiftClick={onShiftClick}
             emptyVariant="dash"

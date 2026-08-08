@@ -9,6 +9,8 @@ interface DayCellProps {
   shifts: Shift[];
   loadCaregivers: (caregiverId: string) => Caregiver | undefined;
   onAddShift: (participantId: string | null, isoDate: string) => void;
+  onEditShift: (shift: Shift) => void;
+  onDeleteShift: (shift: Shift) => void;
   onDuplicateShift: (shift: Shift) => void;
   onShiftClick: (shift: Shift) => void;
   emptyVariant?: 'dash' | 'button';
@@ -21,6 +23,8 @@ export function DayCell({
   shifts,
   loadCaregivers,
   onAddShift,
+  onEditShift,
+  onDeleteShift,
   onDuplicateShift,
   onShiftClick,
   emptyVariant = 'dash',
@@ -51,6 +55,8 @@ export function DayCell({
               ? loadCaregivers(shift.caregiverId)
               : undefined
           }
+          onEditShift={onEditShift}
+          onDelete={onDeleteShift}
           onDuplicate={onDuplicateShift}
           onClick={onShiftClick}
         />

@@ -1,3 +1,5 @@
+import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import {
@@ -7,6 +9,9 @@ import {
   House,
   Users,
   HeartPulse,
+  MoreVertical,
+  Pencil,
+  Trash2,
 } from 'lucide-react';
 import type { Caregiver, Shift } from '../../types/roster';
 import { getShiftColor } from '../../utils/shiftColor';
@@ -17,36 +22,108 @@ interface ShiftCardProps {
   caregiver?: Caregiver;
   onDuplicate?: (shift: Shift) => void;
   onClick?: (shift: Shift) => void;
+  onEditShift?: (shift: Shift) => void;
+  onDelete?: (shift: Shift) => void;
 }
 
 const shiftTypeConfig = {
-  assistance: {
-    label: 'Assistance',
-    icon: HandHelping,
-  },
-  transport: {
-    label: 'Transport',
-    icon: Car,
-  },
-  domestic: {
-    label: 'Domestic',
-    icon: House,
-  },
-  community: {
-    label: 'Community',
-    icon: Users,
-  },
-  nursing: {
-    label: 'Nursing',
-    icon: HeartPulse,
-  },
+  assistance: { label: 'Assistance', icon: HandHelping },
+  transport: { label: 'Transport', icon: Car },
+  domestic: { label: 'Domestic', icon: House },
+  community: { label: 'Community', icon: Users },
+  nursing: { label: 'Nursing', icon: HeartPulse },
 };
 
-export function ShiftCard({ shift, caregiver, onDuplicate, onClick }: ShiftCardProps) {
+// const MENU_WIDTH = 144; // px, ~ w-36
+// const MENU_HEIGHT = 124; // px, 3 items + padding
+const GAP = 4; // px gap between trigger and menu
+
+const MENU_WIDTH = 44;
+const MENU_HEIGHT = 104;
+
+type MenuCoords = {
+  top: number;
+  left: number;
+};
+
+export function ShiftCard({
+  shift,
+  caregiver,
+  onDuplicate,
+  onClick,
+  onEditShift,
+  onDelete,
+}: ShiftCardProps) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: shift.id,
     data: { shift },
   });
+
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [coords, setCoords] = useState<MenuCoords>({ top: 0, left: 0 });
+  const menuRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  const computeCoords = () => {
+    const trigger = triggerRef.current;
+    if (!trigger) return;
+
+    const rect = trigger.getBoundingClientRect();
+    const spaceRight = window.innerWidth - rect.right;
+    const spaceLeft = rect.left;
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+
+    // Horizontal: align menu's right edge to trigger's right edge by
+    // default (opens left), unless there's more room opening right.
+    const openRight = spaceRight >= MENU_WIDTH || spaceRight >= spaceLeft;
+    const left = openRight
+      ? rect.right - MENU_WIDTH // flush with trigger, extending left isn't needed
+        ? rect.left // open so left edge starts at trigger's left edge
+        : rect.left
+      : rect.right - MENU_WIDTH;
+
+    // Vertical: open below by default, unless there's more room above.
+    const openBelow = spaceBelow >= MENU_HEIGHT || spaceBelow >= spaceAbove;
+    const top = openBelow ? rect.bottom + GAP : rect.top - MENU_HEIGHT - GAP;
+
+    setCoords({
+      top,
+      left: openRight ? rect.left : rect.right - MENU_WIDTH,
+    });
+  };
+
+  const toggleMenu = () => {
+    if (!menuOpen) computeCoords();
+    setMenuOpen((prev) => !prev);
+  };
+
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(target) &&
+        triggerRef.current &&
+        !triggerRef.current.contains(target)
+      ) {
+        setMenuOpen(false);
+      }
+    };
+    const handleReposition = () => computeCoords();
+
+    document.addEventListener('mousedown', handleClickOutside);
+    window.addEventListener('resize', handleReposition);
+    window.addEventListener('scroll', handleReposition, true);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('resize', handleReposition);
+      window.removeEventListener('scroll', handleReposition, true);
+    };
+  }, [menuOpen]);
 
   const color = getShiftColor(shift.caregiverId || 'unassigned');
 
@@ -57,8 +134,8 @@ export function ShiftCard({ shift, caregiver, onDuplicate, onClick }: ShiftCardP
   };
 
   const config = shiftTypeConfig[shift.type as keyof typeof shiftTypeConfig];
-
   const Icon = config?.icon;
+
   return (
     <div
       ref={setNodeRef}
@@ -77,6 +154,84 @@ export function ShiftCard({ shift, caregiver, onDuplicate, onClick }: ShiftCardP
         }}
       />
 
+      {/* Three-dot menu trigger */}
+      <button
+        ref={triggerRef}
+        type="button"
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={(e) => {
+          e.stopPropagation();
+          toggleMenu();
+        }}
+        className="absolute right-1 top-1 z-10 rounded p-1 text-slate-400 opacity-0 transition-opacity hover:bg-slate-100 hover:text-slate-600 group-hover:opacity-100 data-[open=true]:opacity-100 data-[open=true]:bg-slate-100"
+        data-open={menuOpen}
+        aria-label="Shift options"
+        aria-haspopup="menu"
+        aria-expanded={menuOpen}
+      >
+        <MoreVertical className="h-3.5 w-3.5" />
+      </button>
+
+      {/* Menu rendered via portal so the card's overflow-hidden can't clip it */}
+      {menuOpen &&
+        createPortal(
+          <div
+            ref={menuRef}
+            role="menu"
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              position: 'fixed',
+              top: coords.top,
+              left: coords.left,
+              width: MENU_WIDTH,
+            }}
+            className="z-50 overflow-hidden rounded-md border border-slate-200 bg-white py-1 shadow-lg"
+          >
+            <button
+              type="button"
+              role="menuitem"
+              // onClick={() => {
+              //   setMenuOpen(false);
+              //   onEditShift?.(shift);
+              // }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onEditShift?.(shift);
+              }}
+              className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-slate-700 hover:bg-slate-50"
+            >
+              <Pencil className="h-3.5 w-3.5" />
+              {/* Edit */}
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setMenuOpen(false);
+                onDuplicate?.(shift);
+              }}
+              className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-slate-700 hover:bg-slate-50"
+            >
+              <Copy className="h-3.5 w-3.5" />
+              {/* Duplicate */}
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setMenuOpen(false);
+                onDelete?.(shift);
+              }}
+              className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-red-600 hover:bg-red-50"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              {/* Delete */}
+            </button>
+          </div>,
+          document.body
+        )}
+
       <div className="mb-2 flex items-center gap-1">
         {caregiver ? (
           <>
@@ -89,7 +244,6 @@ export function ShiftCard({ shift, caregiver, onDuplicate, onClick }: ShiftCardP
             ) : (
               <div className="h-6 w-6 shrink-0 rounded-full bg-slate-300" />
             )}
-
             <span className="truncate whitespace-nowrap text-xs font-semibold text-slate-800">
               {caregiver.name}
             </span>
@@ -97,7 +251,6 @@ export function ShiftCard({ shift, caregiver, onDuplicate, onClick }: ShiftCardP
         ) : (
           <>
             <div className="h-6 w-6 shrink-0 rounded-full bg-slate-200" />
-
             <span className="truncate whitespace-nowrap text-xs font-semibold text-slate-500">
               Unassigned
             </span>
@@ -116,20 +269,8 @@ export function ShiftCard({ shift, caregiver, onDuplicate, onClick }: ShiftCardP
             {config.label}
           </span>
         ) : (
-          <span className="text-[10px] text-slate-500">
-            Unknown
-          </span>
+          <span className="text-[10px] text-slate-500">Unknown</span>
         )}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onDuplicate?.(shift);
-          }}
-          className="rounded p-1 text-slate-300 opacity-0 transition-opacity hover:bg-slate-100 hover:text-slate-500 group-hover:opacity-100"
-          aria-label="Duplicate shift"
-        >
-          <Copy className="h-3.5 w-3.5" />
-        </button>
       </div>
     </div>
   );

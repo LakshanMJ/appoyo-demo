@@ -26,7 +26,6 @@ interface RosterStore {
     address?: string;
     allocatedBudget?: number;
   }) => Promise<void>;
-
   moveShift: (shiftId: string, targetParticipantId: string | null, targetDate: string) => Promise<void>;
   createShift: (
     dto: CreateShiftDto
@@ -34,8 +33,24 @@ interface RosterStore {
     success: boolean;
     message?: string;
   }>;
+  updateShift: (
+    shiftId: string,
+    dto: CreateShiftDto
+  ) => Promise<{
+    success: boolean;
+    message?: string;
+  }>;
+  deleteShift: (
+    shiftId: string
+  ) => Promise<{
+    success: boolean;
+    message?: string;
+  }>;
   duplicateShift: (shift: Shift) => Promise<void>;
 }
+
+
+
 
 export const useRosterStore = create<RosterStore>((set, get) => ({
   // participants: PARTICIPANTS,
@@ -159,7 +174,7 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
     }
   },
 
-  // 6
+  // 6 - working
   moveShift: async (
     shiftId,
     targetParticipantId,
@@ -273,6 +288,108 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
     }
   },
 
+  // 7
+  updateShift: async (shiftId, dto) => {
+    try {
+      const updated = await rosterApi.shifts.update(
+        shiftId,
+        dto
+      );
+      set((state) => ({
+        shifts: state.shifts.map((shift) =>
+          shift.id === shiftId
+            ? {
+              ...shift,
+              ...updated,
+              participantId: dto.participantId,
+              startTime: dto.startTime,
+              endTime: dto.endTime,
+            }
+            : shift
+        ),
+        vacantShifts: state.vacantShifts.map((shift) =>
+          shift.id === shiftId
+            ? {
+              ...shift,
+              ...updated,
+              participantId: dto.participantId,
+              startTime: dto.startTime,
+              endTime: dto.endTime,
+            }
+            : shift
+        ),
+      }));
+      return { success: true };
+    } catch (err) {
+      console.error('Failed to update shift', err);
+      if (axios.isAxiosError(err)) {
+        return {
+          success: false,
+          message:
+            err.response?.data?.message ??
+            'Failed to update shift',
+        };
+      }
+      return {
+        success: false,
+        message: 'Unexpected error occurred',
+      };
+    }
+  },
+
+  // 8
+  deleteShift: async (shiftId) => {
+    const prevShifts = get().shifts;
+    const prevVacantShifts = get().vacantShifts;
+
+    // Optimistic UI update
+    set({
+      shifts: prevShifts.filter(
+        (shift) => shift.id !== shiftId
+      ),
+      vacantShifts: prevVacantShifts.filter(
+        (shift) => shift.id !== shiftId
+      ),
+    });
+
+    if (USE_MOCK_DATA) {
+      return { success: true };
+    }
+
+    try {
+      await rosterApi.shifts.delete(shiftId);
+
+      return {
+        success: true,
+      };
+    } catch (err) {
+      console.error(
+        'Failed to delete shift, rolling back',
+        err
+      );
+
+      // Roll back if backend fails
+      set({
+        shifts: prevShifts,
+        vacantShifts: prevVacantShifts,
+      });
+
+      if (axios.isAxiosError(err)) {
+        return {
+          success: false,
+          message:
+            err.response?.data?.message ??
+            'Failed to delete shift',
+        };
+      }
+
+      return {
+        success: false,
+        message: 'Unexpected error occurred',
+      };
+    }
+  },
+
   // ......................................................check and delete.................................................................
   loadWeek: async (weekStartIso) => {
     if (USE_MOCK_DATA) return; // mock data is already loaded synchronously
@@ -293,40 +410,6 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
 
   // 2
   getStaff: (staffId) => STAFF[staffId] ?? { id: staffId, name: 'Unknown Staff' },
-
-  // Optimistic move: update local state immediately so the drag feels instant,
-  // then persist to the backend. Roll back if the request fails.
-  // 3
-  // moveShift: async (shiftId, targetParticipantId, targetDate) => {
-  //   const prevShifts = get().shifts;
-  //   const prevVacant = get().vacantShifts;
-
-  //   const allShifts = [...prevShifts, ...prevVacant];
-  //   const moved = allShifts.find((s) => s.id === shiftId);
-  //   if (!moved) return;
-
-  //   const updated: Shift = { ...moved, participantId: targetParticipantId, date: targetDate };
-
-  //   set({
-  //     shifts: [...prevShifts.filter((s) => s.id !== shiftId), ...(targetParticipantId ? [updated] : [])].filter(
-  //       (s) => s.participantId !== null,
-  //     ),
-  //     vacantShifts: [
-  //       ...prevVacant.filter((s) => s.id !== shiftId),
-  //       ...(targetParticipantId === null ? [updated] : []),
-  //     ],
-  //   });
-
-  //   if (USE_MOCK_DATA) return;
-  //   try {
-  //     await rosterApi.moveShift({ shiftId, participantId: targetParticipantId, date: targetDate });
-  //   } catch (err) {
-  //     console.error('Failed to move shift, rolling back', err);
-  //     set({ shifts: prevShifts, vacantShifts: prevVacant });
-  //   }
-  // },
-
-
 
   // 5
   duplicateShift: async (shift) => {
