@@ -57,7 +57,24 @@ export class ShiftsService {
     });
   }
 
-  // 4. Move Shift (Handles Drag & Drop)
+  // 4. Update Shift
+  async update(id: string, dto: CreateShiftDto) {
+    return this.prisma.shift.update({
+      where: {
+        id,
+      },
+      data: {
+        participantId: dto.participantId ?? null,
+        caregiverId: dto.caregiverId ?? null,
+        startTime: new Date(dto.startTime),
+        endTime: new Date(dto.endTime),
+        type: dto.type,
+        // hasAlert: dto.hasAlert ?? false,
+      },
+    });
+  }
+
+  // 5. Move Shift (Handles Drag & Drop)
   async move(id: string, dto: MoveShiftDto) {
     console.log('🔥 SERVICE MOVE WAS CALLED');
     console.log('ID:', id);
@@ -74,38 +91,14 @@ export class ShiftsService {
     });
   }
 
-  // async findAll(query: GetShiftsDto) {
-  //   const { startDate, endDate, organizationId } = query;
-
-  //   return this.prisma.shift.findMany({
-  //     where: {
-  //       organizationId,
-  //       startTime: { gte: new Date(startDate) },
-  //       endTime: { lte: new Date(endDate) },
-  //     },
-  //     include: {
-  //       participant: true,
-  //       caregiver: true,
-  //     },
-  //     orderBy: {
-  //       startTime: 'asc',
-  //     },
-  //   });
-  // }
-
-  // 2. Fetch single shift details
-  // async findOne(id: string) {
-  //   const shift = await this.prisma.shift.findUnique({
-  //     where: { id },
-  //     include: { participant: true, caregiver: true },
-  //   });
-
-  //   if (!shift) {
-  //     throw new NotFoundException(`Shift with ID ${id} not found.`);
-  //   }
-
-  //   return shift;
-  // }
+  // 6. Delete Shift
+  async remove(id: string) {
+    return this.prisma.shift.delete({
+      where: {
+        id,
+      },
+    });
+  }
 
   // Standalone conflict check method.................................................................
 
@@ -146,44 +139,4 @@ export class ShiftsService {
       hasConflict: false,
     };
   }
-
-
-
-  // 5. Update Shift (Handles Drag & Drop or Resizing)
-  // async update(id: string, dto: UpdateShiftDto) {
-  //   const existingShift = await this.findOne(id);
-
-  //   const startTime = dto.startTime || existingShift.startTime.toISOString();
-  //   const endTime = dto.endTime || existingShift.endTime.toISOString();
-  //   const participantId = dto.participantId || existingShift.participantId;
-  //   const caregiverId = dto.caregiverId !== undefined ? dto.caregiverId : existingShift.caregiverId;
-
-  //   const conflictResult = await this.checkConflict({
-  //     startTime,
-  //     endTime,
-  //     participantId,
-  //     caregiverId,
-  //     excludeShiftId: id,
-  //   });
-
-  //   if (conflictResult.hasConflict) {
-  //     throw new BadRequestException(conflictResult.message);
-  //   }
-
-  //   return this.prisma.shift.update({
-  //     where: { id },
-  //     data: {
-  //       ...dto,
-  //       startTime: dto.startTime ? new Date(dto.startTime) : undefined,
-  //       endTime: dto.endTime ? new Date(dto.endTime) : undefined,
-  //     },
-  //     include: { participant: true, caregiver: true },
-  //   });
-  // }
-
-  // 6. Delete Shift
-  // async remove(id: string) {
-  //   await this.findOne(id);
-  //   return this.prisma.shift.delete({ where: { id } });
-  // }
 }

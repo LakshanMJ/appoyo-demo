@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Delete,
   Param,
   Patch,
   Post,
@@ -26,6 +27,19 @@ export class ShiftsController {
     @Query('endDate') endDate: string,
   ) {
     return this.shiftsService.findAll(startDate, endDate);
+  }
+
+  @Patch(':id')
+  update(
+    @Param('id') id: string,
+    @Body() dto: CreateShiftDto,
+  ) {
+    return this.shiftsService.update(id, dto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.shiftsService.remove(id);
   }
 
   @Patch(':id/move')
