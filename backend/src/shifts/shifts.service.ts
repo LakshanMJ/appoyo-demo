@@ -2,6 +2,7 @@ import { Injectable, BadRequestException, NotFoundException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateShiftDto } from './dto/create-shift.dto';
 import type { CheckConflictDto } from './dto/check-conflict.dto';
+import type { MoveShiftDto } from './dto/move-shift.dto';
 // import { UpdateShiftDto } from './dto/update-shift.dto';
 // import { GetShiftsDto } from './dto/get-shifts.dto';
 
@@ -56,7 +57,23 @@ export class ShiftsService {
     });
   }
 
-  
+  // 4. Move Shift (Handles Drag & Drop)
+  async move(id: string, dto: MoveShiftDto) {
+    console.log('🔥 SERVICE MOVE WAS CALLED');
+    console.log('ID:', id);
+    console.log('DTO:', dto);
+    return this.prisma.shift.update({
+      where: {
+        id,
+      },
+      data: {
+        participantId: dto.participantId ?? null,
+        startTime: new Date(dto.startTime),
+        endTime: new Date(dto.endTime),
+      },
+    });
+  }
+
   // async findAll(query: GetShiftsDto) {
   //   const { startDate, endDate, organizationId } = query;
 
