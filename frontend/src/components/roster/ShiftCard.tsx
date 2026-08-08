@@ -2,20 +2,19 @@ import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
+import { IoCopy, IoPencil } from "react-icons/io5";
+import { AiFillDelete } from "react-icons/ai";
 import {
-  Copy,
-  HandHelping,
-  Car,
-  House,
-  Users,
-  HeartPulse,
-  MoreVertical,
-  Pencil,
-  Trash2,
-} from 'lucide-react';
+  FaHandsHelping,
+  FaCar,
+  FaHome,
+  FaUsers,
+  FaHeartbeat,
+} from 'react-icons/fa';
 import type { Caregiver, Shift } from '../../types/roster';
 import { getShiftColor } from '../../utils/shiftColor';
 import { formatShiftTime } from '../../utils/time';
+import { MoreVertical } from 'lucide-react';
 
 interface ShiftCardProps {
   shift: Shift;
@@ -27,18 +26,36 @@ interface ShiftCardProps {
 }
 
 const shiftTypeConfig = {
-  assistance: { label: 'Assistance', icon: HandHelping },
-  transport: { label: 'Transport', icon: Car },
-  domestic: { label: 'Domestic', icon: House },
-  community: { label: 'Community', icon: Users },
-  nursing: { label: 'Nursing', icon: HeartPulse },
+  assistance: {
+    label: 'Assistance',
+    icon: FaHandsHelping,
+    color: 'text-amber-500',
+  },
+  transport: {
+    label: 'Transport',
+    icon: FaCar,
+    color: 'text-indigo-600',
+  },
+  domestic: {
+    label: 'Domestic',
+    icon: FaHome,
+    color: 'text-green-600',
+  },
+  community: {
+    label: 'Community',
+    icon: FaUsers,
+    color: 'text-purple-500',
+  },
+  nursing: {
+    label: 'Nursing',
+    icon: FaHeartbeat,
+    color: 'text-rose-500',
+  },
 };
 
-// const MENU_WIDTH = 144; // px, ~ w-36
-// const MENU_HEIGHT = 124; // px, 3 items + padding
-const GAP = 4; // px gap between trigger and menu
+const GAP = 4;
 
-const MENU_WIDTH = 44;
+const MENU_WIDTH = 40;
 const MENU_HEIGHT = 104;
 
 type MenuCoords = {
@@ -74,16 +91,13 @@ export function ShiftCard({
     const spaceBelow = window.innerHeight - rect.bottom;
     const spaceAbove = rect.top;
 
-    // Horizontal: align menu's right edge to trigger's right edge by
-    // default (opens left), unless there's more room opening right.
     const openRight = spaceRight >= MENU_WIDTH || spaceRight >= spaceLeft;
     const left = openRight
-      ? rect.right - MENU_WIDTH // flush with trigger, extending left isn't needed
-        ? rect.left // open so left edge starts at trigger's left edge
+      ? rect.right - MENU_WIDTH
+        ? rect.left
         : rect.left
       : rect.right - MENU_WIDTH;
 
-    // Vertical: open below by default, unless there's more room above.
     const openBelow = spaceBelow >= MENU_HEIGHT || spaceBelow >= spaceAbove;
     const top = openBelow ? rect.bottom + GAP : rect.top - MENU_HEIGHT - GAP;
 
@@ -143,7 +157,7 @@ export function ShiftCard({
       {...listeners}
       {...attributes}
       onClick={() => onClick?.(shift)}
-      className={`group relative cursor-grab overflow-hidden rounded-lg border-l-4 bg-white p-3 shadow-sm ring-1 ring-black/5 transition-shadow hover:shadow-md active:cursor-grabbing ${isDragging ? 'opacity-40' : ''
+      className={`group relative cursor-grab overflow-hidden rounded-lg border-l-4 bg-white p-3 font-inter shadow-sm ring-1 ring-black/5 transition-shadow hover:shadow-md active:cursor-grabbing ${isDragging ? 'opacity-40' : ''
         }`}
     >
       <div
@@ -154,7 +168,6 @@ export function ShiftCard({
         }}
       />
 
-      {/* Three-dot menu trigger */}
       <button
         ref={triggerRef}
         type="button"
@@ -163,7 +176,8 @@ export function ShiftCard({
           e.stopPropagation();
           toggleMenu();
         }}
-        className="absolute right-1 top-1 z-10 rounded p-1 text-slate-400 opacity-0 transition-opacity hover:bg-slate-100 hover:text-slate-600 group-hover:opacity-100 data-[open=true]:opacity-100 data-[open=true]:bg-slate-100"
+        // className="absolute right-1 top-1 z-10 rounded p-1 text-slate-400 opacity-0 transition-opacity hover:bg-slate-100 hover:text-slate-600 group-hover:opacity-100 data-[open=true]:opacity-100 data-[open=true]:bg-slate-100"
+        className="absolute right-1 top-1 z-10 rounded p-1 text-slate-400 opacity-0 transition-opacity hover:text-slate-600 group-hover:opacity-100 data-[open=true]:opacity-100"
         data-open={menuOpen}
         aria-label="Shift options"
         aria-haspopup="menu"
@@ -172,7 +186,6 @@ export function ShiftCard({
         <MoreVertical className="h-3.5 w-3.5" />
       </button>
 
-      {/* Menu rendered via portal so the card's overflow-hidden can't clip it */}
       {menuOpen &&
         createPortal(
           <div
@@ -186,49 +199,52 @@ export function ShiftCard({
               left: coords.left,
               width: MENU_WIDTH,
             }}
-            className="z-50 overflow-hidden rounded-md border border-slate-200 bg-white py-1 shadow-lg"
+            className="z-50 overflow-hidden rounded-lg border border-slate-200/80 bg-white p-1 shadow-[0_4px_16px_rgba(15,23,42,0.12)]"
           >
+            {/* Edit */}
             <button
               type="button"
               role="menuitem"
-              // onClick={() => {
-              //   setMenuOpen(false);
-              //   onEditShift?.(shift);
-              // }}
+              aria-label="Edit shift"
               onClick={(e) => {
                 e.stopPropagation();
+                setMenuOpen(false);
                 onEditShift?.(shift);
               }}
-              className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-slate-700 hover:bg-slate-50"
+              className="flex h-6 w-full items-center justify-center rounded-md text-slate-500 transition-colors duration-150 hover:bg-teal-50 hover:text-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-100"
             >
-              <Pencil className="h-3.5 w-3.5" />
-              {/* Edit */}
+              <IoPencil className="h-3.5 w-3.5" />
             </button>
+
+            {/* Duplicate */}
             <button
               type="button"
               role="menuitem"
+              aria-label="Duplicate shift"
               onClick={() => {
                 setMenuOpen(false);
                 onDuplicate?.(shift);
               }}
-              className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-slate-700 hover:bg-slate-50"
+              className="flex h-6 w-full items-center justify-center rounded-md text-slate-500 transition-colors duration-150 hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-100"
             >
-              <Copy className="h-3.5 w-3.5" />
-              {/* Duplicate */}
+              <IoCopy className="h-3.5 w-3.5" />
             </button>
+
+            {/* Delete */}
             <button
               type="button"
               role="menuitem"
+              aria-label="Delete shift"
               onClick={() => {
                 setMenuOpen(false);
                 onDelete?.(shift);
               }}
-              className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-red-600 hover:bg-red-50"
+              className="flex h-6 w-full items-center justify-center rounded-md text-red-500 transition-colors duration-150 hover:bg-red-50 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-100"
             >
-              <Trash2 className="h-3.5 w-3.5" />
-              {/* Delete */}
+              <AiFillDelete className="h-3.5 w-3.5" />
             </button>
-          </div>,
+          </div>
+          ,
           document.body
         )}
 
@@ -262,16 +278,53 @@ export function ShiftCard({
         {formatShiftTime(shift.startTime)} - {formatShiftTime(shift.endTime)}
       </p>
 
-      <div className="flex items-center justify-between">
+      {/* <div className="flex items-center justify-between">
         {config ? (
-          <span className="flex items-center gap-1 rounded-md bg-[#FFEED4] px-1.5 py-0.5 text-[10px] font-medium text-amber-700">
+          <span className="flex items-center gap-1 rounded-sm bg-[#FFEED4] px-1.5 py-0.5 text-[10px] font-medium text-amber-700">
             {Icon && <Icon className="h-3 w-3" />}
             {config.label}
           </span>
         ) : (
           <span className="text-[10px] text-slate-500">Unknown</span>
         )}
+      </div> */}
+
+      {/* <div className="flex items-center justify-between">
+        {config ? (
+          <span
+            className={`flex items-center gap-1 rounded-sm px-1.5 py-0.5 text-[10px] font-medium ${config.bg} ${config.color}`}
+          >
+            {Icon && (
+              <Icon
+                className={`h-3 w-3 ${config.color}`}
+              />
+            )}
+            {config.label}
+          </span>
+        ) : (
+          <span className="text-[10px] text-slate-500">
+            Unknown
+          </span>
+        )}
+      </div> */}
+
+      <div className="flex items-center justify-between">
+        {config ? (
+          <span className="flex items-center gap-1 rounded-sm bg-[#FFEED4] px-1.5 py-0.5 text-[10px] font-medium text-amber-700">
+            {Icon && (
+              <Icon
+                className={`h-3 w-3 ${config.color}`}
+              />
+            )}
+            {config.label}
+          </span>
+        ) : (
+          <span className="text-[10px] text-slate-500">
+            Unknown
+          </span>
+        )}
       </div>
+
     </div>
   );
 }

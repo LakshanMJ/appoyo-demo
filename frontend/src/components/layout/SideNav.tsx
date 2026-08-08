@@ -34,14 +34,13 @@ export function SideNav({ active, onSelect }: SideNavProps) {
           <button
             key={item.label}
             onClick={() => onSelect(item.label)}
-            className={`flex items-center justify-between rounded-lg px-3 py-2.5 text-left text-[15px] transition-colors ${
-              isActive
-                ? 'bg-[#1A3A66] font-medium text-white'
-                : 'text-slate-300 hover:bg-white/5 hover:text-white'
-            }`}
+            className={`flex items-center justify-between rounded-l-md px-3 py-2.5 text-left text-[15px] transition-colors ${isActive
+                ? 'bg-[#3B4C63] font-normal text-white'
+                : 'font-light text-slate-300 hover:bg-white/5 hover:text-white'
+              }`}
           >
             <span>{item.label}</span>
-            {item.expandable && <ChevronRight className="h-4 w-4 text-slate-500" />}
+            {item.expandable && <ChevronRight className="h-4 w-4 text-slate-300 " />}
           </button>
         );
       })}

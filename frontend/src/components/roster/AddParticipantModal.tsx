@@ -56,7 +56,7 @@ export function AddParticipantModal({
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Participant name"
-            className="w-full rounded-lg border p-2"
+            className="w-full rounded-lg border p-2 border border-slate-200 focus:border-teal-400 focus:outline-none"
           />
 
 
@@ -64,7 +64,7 @@ export function AddParticipantModal({
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder="Phone number"
-            className="w-full rounded-lg border p-2"
+            className="w-full rounded-lg border p-2 border border-slate-200 focus:border-teal-400 focus:outline-none"
           />
 
 
@@ -72,7 +72,7 @@ export function AddParticipantModal({
             value={address}
             onChange={(e) => setAddress(e.target.value)}
             placeholder="Address"
-            className="w-full rounded-lg border p-2"
+            className="w-full rounded-lg border p-2 border border-slate-200 focus:border-teal-400 focus:outline-none"
           />
 
 
@@ -81,7 +81,7 @@ export function AddParticipantModal({
             value={allocatedBudget}
             onChange={(e) => setAllocatedBudget(e.target.value)}
             placeholder="Allocated budget"
-            className="w-full rounded-lg border p-2"
+            className="w-full rounded-lg border p-2 border border-slate-200 focus:border-teal-400 focus:outline-none"
           />
 
 
@@ -89,14 +89,14 @@ export function AddParticipantModal({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border px-4 py-2"
+              className="rounded-lg border px-4 py-2 border border-slate-200"
             >
               Cancel
             </button>
 
             <button
               type="submit"
-              className="rounded-lg bg-teal-600 px-4 py-2 text-white"
+              className="rounded-lg bg-fuchsia-800 px-4 py-2 text-white"
             >
               Create
             </button>

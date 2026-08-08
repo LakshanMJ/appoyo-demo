@@ -54,7 +54,7 @@ export function ParticipantRow({
 }: ParticipantRowProps) {
   return (
     <>
-      <div className={`px-3 py-4 ${cellBorderClasses(0)}`}>
+      <div className={`border-b-2 border-slate-200 px-3 py-4 ${cellBorderClasses(0)}`}>
         <p className="text-[15px] font-semibold text-slate-900">{participant.name}</p>
         <p className="mt-1 text-sm text-slate-500">
           Allocated: <span className="font-medium text-teal-600">{formatMoney(participant.allocatedBudget)}</span>
@@ -65,7 +65,7 @@ export function ParticipantRow({
       </div>
 
       {days.map((day, idx) => (
-        <div key={day.isoDate} className={cellBorderClasses(idx + 1)}>
+        <div key={day.isoDate} className={`border-b-2 border-slate-200 ${cellBorderClasses(idx + 1)}`}>
           <DayCell
             participantId={participant.id}
             isoDate={day.isoDate}

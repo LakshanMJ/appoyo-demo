@@ -50,12 +50,12 @@ const TYPE_OPTIONS: {
   value: ShiftType;
   label: string;
 }[] = [
-  { value: 'assistance', label: 'Assistance' },
-  { value: 'transport', label: 'Transport' },
-  { value: 'domestic', label: 'Domestic' },
-  { value: 'community', label: 'Community Access' },
-  { value: 'nursing', label: 'Nursing' },
-];
+    { value: 'assistance', label: 'Assistance' },
+    { value: 'transport', label: 'Transport' },
+    { value: 'domestic', label: 'Domestic' },
+    { value: 'community', label: 'Community Access' },
+    { value: 'nursing', label: 'Nursing' },
+  ];
 
 export function AddShiftModal({
   participantId,
@@ -188,13 +188,34 @@ export function AddShiftModal({
     if (!result?.success) {
       setError(
         result?.message ??
-          (isEditMode ? 'Failed updating shift' : 'Failed creating shift')
+        (isEditMode ? 'Failed updating shift' : 'Failed creating shift')
       );
       return;
     }
 
     onClose();
   }
+
+  const timePickerSx = {
+    '& .MuiPickersOutlinedInput-root': {
+      borderRadius: '10px',
+      fontFamily: 'Inter, sans-serif',
+
+      '& .MuiPickersOutlinedInput-notchedOutline': {
+        borderColor: '#e2e8f0',
+        borderRadius: '8px',
+      },
+
+      '&.Mui-focused .MuiPickersOutlinedInput-notchedOutline': {
+        borderColor: '#2dd4bf !important',
+        borderWidth: '1px !important',
+      },
+    },
+
+    '& .MuiPickersSectionList-sectionContent': {
+      fontFamily: 'Inter, sans-serif',
+    },
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
@@ -267,6 +288,7 @@ export function AddShiftModal({
                   textField: {
                     size: 'small',
                     fullWidth: true,
+                    sx: timePickerSx,
                   },
                 }}
               />
@@ -287,6 +309,7 @@ export function AddShiftModal({
                   textField: {
                     size: 'small',
                     fullWidth: true,
+                    sx: timePickerSx,
                   },
                 }}
               />
@@ -314,19 +337,6 @@ export function AddShiftModal({
                 </option>
               ))}
             </select>
-          </label>
-
-          <label className="flex items-center gap-2 text-sm text-slate-700">
-            <input
-              type="checkbox"
-              checked={hasAlert}
-              onChange={(e) =>
-                setHasAlert(e.target.checked)
-              }
-              className="h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-400"
-            />
-
-            Flag for review
           </label>
 
           {error && (

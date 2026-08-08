@@ -23,7 +23,10 @@ export function AddParticipantRow({ days, onAddParticipant, onAddShift }: AddPar
         <div key={day.isoDate} className={`px-3 py-3 ${cellBorderClasses(idx + 1)}`}>
           <button
             onClick={() => onAddShift(day.isoDate)}
-            className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-slate-200 py-2.5 text-sm font-medium text-slate-500 hover:border-teal-400 hover:text-teal-600"
+            className="flex w-full items-center justify-center gap-1.5 rounded-sm border-0 py-2.5 text-sm font-medium text-slate-500 transition-colors hover:text-teal-600"
+            style={{
+              border: '1px dashed #e2e8f0',
+            }}
           >
             <Plus className="h-4 w-4" />
             Add Shift
