@@ -76,6 +76,7 @@ model Caregiver {
 
   name  String
   phone String?
+  avatarUrl String?
 
   shifts Shift[]
 
