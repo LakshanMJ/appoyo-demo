@@ -27,6 +27,18 @@ export const rosterApi = {
       });
       return response.data;
     },
+    moveShift: async (data) => {
+      const response = await api.patch(
+        `/shifts/${data.shiftId}/move`,
+        {
+          participantId: data.participantId,
+          startTime: data.startTime,
+          endTime: data.endTime,
+        },
+      );
+
+      return response.data;
+    },
   },
 
   participants: {

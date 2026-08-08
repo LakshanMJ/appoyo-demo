@@ -5,6 +5,7 @@ import type { DayColumn } from '../../utils/week';
 import type { Participant, Shift, Staff } from '../../types/roster';
 import { cellBorderClasses } from '../../utils/gridCell';
 import { DayCell } from './DayCell';
+import { getShiftRosterDate } from '../../utils/shiftDate';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -64,7 +65,9 @@ export function ParticipantRow({
           <DayCell
             participantId={participant.id}
             isoDate={day.isoDate}
-            shifts={shifts.filter((s) => shiftLocalDate(s.startTime) === day.isoDate)}
+            shifts={shifts.filter(
+              (shift) => getShiftRosterDate(shift.startTime) === day.isoDate
+            )}
             loadCaregivers={loadCaregivers}
             onAddShift={onAddShift}
             onDuplicateShift={onDuplicateShift}

@@ -3,6 +3,7 @@ import { MOCK_SHIFTS, MOCK_VACANT_SHIFTS, PARTICIPANTS, STAFF } from '../data/mo
 import { rosterApi } from '../api/apiClient';
 import type { Caregiver, CreateShiftDto, Participant, Shift } from '../types/roster';
 import axios from 'axios';
+import { moveShiftToDate } from '../utils/shiftDate';
 
 // Toggle this to false once your NestJS endpoints are live —
 // it lets the frontend be built and demoed independently of the backend.
@@ -141,6 +142,7 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
     }
   },
 
+  // 5 - working
   // get the shifts for the current week and update the store
   loadShifts: async (startDate, endDate) => {
     try {
@@ -157,7 +159,121 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
     }
   },
 
+  // 6
+  moveShift: async (
+    shiftId,
+    targetParticipantId,
+    targetDate,
+  ) => {
+    const prevShifts = get().shifts;
+    const prevVacant = get().vacantShifts;
 
+    const allShifts = [
+      ...prevShifts,
+      ...prevVacant,
+    ];
+
+    const moved = allShifts.find(
+      (shift) => shift.id === shiftId,
+    );
+
+    if (!moved) {
+      console.warn(
+        'Could not find shift:',
+        shiftId,
+      );
+      return;
+    }
+
+    /*
+     * Change the calendar date while preserving
+     * the original start/end times.
+     *
+     * Example:
+     *
+     * Aug 5 09:00 → Aug 5 17:00
+     *
+     * dragged to Aug 7
+     *
+     * becomes:
+     *
+     * Aug 7 09:00 → Aug 7 17:00
+     */
+    const { startTime, endTime } =
+      moveShiftToDate(
+        moved.startTime,
+        moved.endTime,
+        targetDate,
+      );
+    console.log('MOVE SHIFT:', {
+      originalStart: moved.startTime,
+      originalEnd: moved.endTime,
+      targetDate,
+      newStart: startTime,
+      newEnd: endTime,
+    });
+
+    const updated: Shift = {
+      ...moved,
+      participantId: targetParticipantId,
+      startTime,
+      endTime,
+    };
+
+    /*
+     * Optimistic update.
+     *
+     * If participantId exists → participant row
+     * If participantId is null → vacant row
+     */
+    set({
+      shifts: [
+        ...prevShifts.filter(
+          (shift) => shift.id !== shiftId,
+        ),
+        ...(targetParticipantId
+          ? [updated]
+          : []),
+      ],
+
+      vacantShifts: [
+        ...prevVacant.filter(
+          (shift) => shift.id !== shiftId,
+        ),
+        ...(targetParticipantId === null
+          ? [updated]
+          : []),
+      ],
+    });
+
+    /*
+     * Persist the move to backend.
+     */
+    try {
+      if (USE_MOCK_DATA) {
+        return;
+      }
+
+      await rosterApi.shifts.moveShift({
+        shiftId,
+        participantId: targetParticipantId,
+        startTime,
+        endTime,
+      });
+    } catch (err) {
+      console.error(
+        'Failed to move shift, rolling back',
+        err,
+      );
+
+      set({
+        shifts: prevShifts,
+        vacantShifts: prevVacant,
+      });
+    }
+  },
+
+  // ......................................................check and delete.................................................................
   loadWeek: async (weekStartIso) => {
     if (USE_MOCK_DATA) return; // mock data is already loaded synchronously
     set({ isLoading: true });
@@ -181,34 +297,34 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
   // Optimistic move: update local state immediately so the drag feels instant,
   // then persist to the backend. Roll back if the request fails.
   // 3
-  moveShift: async (shiftId, targetParticipantId, targetDate) => {
-    const prevShifts = get().shifts;
-    const prevVacant = get().vacantShifts;
+  // moveShift: async (shiftId, targetParticipantId, targetDate) => {
+  //   const prevShifts = get().shifts;
+  //   const prevVacant = get().vacantShifts;
 
-    const allShifts = [...prevShifts, ...prevVacant];
-    const moved = allShifts.find((s) => s.id === shiftId);
-    if (!moved) return;
+  //   const allShifts = [...prevShifts, ...prevVacant];
+  //   const moved = allShifts.find((s) => s.id === shiftId);
+  //   if (!moved) return;
 
-    const updated: Shift = { ...moved, participantId: targetParticipantId, date: targetDate };
+  //   const updated: Shift = { ...moved, participantId: targetParticipantId, date: targetDate };
 
-    set({
-      shifts: [...prevShifts.filter((s) => s.id !== shiftId), ...(targetParticipantId ? [updated] : [])].filter(
-        (s) => s.participantId !== null,
-      ),
-      vacantShifts: [
-        ...prevVacant.filter((s) => s.id !== shiftId),
-        ...(targetParticipantId === null ? [updated] : []),
-      ],
-    });
+  //   set({
+  //     shifts: [...prevShifts.filter((s) => s.id !== shiftId), ...(targetParticipantId ? [updated] : [])].filter(
+  //       (s) => s.participantId !== null,
+  //     ),
+  //     vacantShifts: [
+  //       ...prevVacant.filter((s) => s.id !== shiftId),
+  //       ...(targetParticipantId === null ? [updated] : []),
+  //     ],
+  //   });
 
-    if (USE_MOCK_DATA) return;
-    try {
-      await rosterApi.moveShift({ shiftId, participantId: targetParticipantId, date: targetDate });
-    } catch (err) {
-      console.error('Failed to move shift, rolling back', err);
-      set({ shifts: prevShifts, vacantShifts: prevVacant });
-    }
-  },
+  //   if (USE_MOCK_DATA) return;
+  //   try {
+  //     await rosterApi.moveShift({ shiftId, participantId: targetParticipantId, date: targetDate });
+  //   } catch (err) {
+  //     console.error('Failed to move shift, rolling back', err);
+  //     set({ shifts: prevShifts, vacantShifts: prevVacant });
+  //   }
+  // },
 
 
 

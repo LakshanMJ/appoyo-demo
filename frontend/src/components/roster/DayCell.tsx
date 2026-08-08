@@ -1,6 +1,6 @@
 import { useDroppable } from '@dnd-kit/core';
 import { Plus } from 'lucide-react';
-import type { Caregiver, Shift, Staff } from '../../types/roster';
+import type { Caregiver, Shift } from '../../types/roster';
 import { ShiftCard } from './ShiftCard';
 
 interface DayCellProps {
@@ -12,7 +12,7 @@ interface DayCellProps {
   onDuplicateShift: (shift: Shift) => void;
   onShiftClick: (shift: Shift) => void;
   emptyVariant?: 'dash' | 'button';
-  compact?: boolean; // add this
+  compact?: boolean;
 }
 
 export function DayCell({
@@ -26,11 +26,15 @@ export function DayCell({
   emptyVariant = 'dash',
   compact = false,
 }: DayCellProps) {
+
   const { setNodeRef, isOver } = useDroppable({
-    id: `${participantId ?? 'vacant'}::${isoDate}`,
-    data: { participantId, isoDate },
+    id: `${participantId ?? 'vacant'}-${isoDate}`,
+    data: {
+      participantId,
+      isoDate,
+    },
   });
-  console.log(shifts,'shifts')
+
   return (
     <div
       ref={setNodeRef}
@@ -38,16 +42,6 @@ export function DayCell({
         } flex-col gap-2.5 p-2.5 transition-colors ${isOver ? 'bg-teal-50 ring-2 ring-inset ring-teal-300' : ''
         }`}
     >
-      {/* {shifts.map((shift) => (
-        <ShiftCard
-          key={shift.id}
-          shift={shift}
-          caregiver={loadCaregivers(shift.caregiverId)}
-          onDuplicate={onDuplicateShift}
-          onClick={onShiftClick}
-        />
-      ))} */}
-
       {shifts.map((shift) => (
         <ShiftCard
           key={shift.id}

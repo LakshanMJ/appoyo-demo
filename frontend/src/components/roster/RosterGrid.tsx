@@ -20,6 +20,7 @@ export function RosterGrid({ weekStart }: RosterGridProps) {
 
   const { loadCaregivers, caregivers, loadParticipants, participants, loadShifts, shifts, vacantShifts, moveShift, createShift, duplicateShift, createParticipant } =
     useRosterStore();
+    // console.log(vacantShifts,'vacantShiftszzzz')
   const [activeShift, setActiveShift] = useState<Shift | null>(null);
   const [modalTarget, setModalTarget] = useState<{ participantId: string | null; isoDate: string } | null>(null);
   const [showParticipantModal, setShowParticipantModal] = useState(false);

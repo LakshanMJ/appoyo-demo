@@ -64,5 +64,6 @@ export interface CreateShiftDto {
 export interface MoveShiftDto {
   shiftId: string;
   participantId: string | null;
-  date: string;
+  startTime: string;
+  endTime: string;
 }
