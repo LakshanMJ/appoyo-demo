@@ -55,9 +55,11 @@ model User {
 model Participant {
   id             String       @id @default(uuid())
 
-  name    String
+  firstName    String
+  lastName    String
   phone   String?
-  address String?
+  addressLine1 String?
+  addressLine2 String?
   allocatedBudget Int @default(0)
   
   shifts Shift[]
@@ -65,7 +67,8 @@ model Participant {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([name])
+  @@index([firstName])
+  @@index([lastName])
 }
 
 model Caregiver {

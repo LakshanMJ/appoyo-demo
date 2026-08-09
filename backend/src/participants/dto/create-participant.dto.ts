@@ -2,7 +2,10 @@ import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateParticipantDto {
   @IsString()
-  name!: string;
+  firstName!: string;
+
+  @IsString()
+  lastName!: string;
 
   @IsOptional()
   @IsString()
@@ -10,7 +13,11 @@ export class CreateParticipantDto {
 
   @IsOptional()
   @IsString()
-  address?: string;
+  addressLine1?: string;
+
+  @IsOptional()
+  @IsString()
+  addressLine2?: string;
 
   @IsOptional()
   @IsNumber()
