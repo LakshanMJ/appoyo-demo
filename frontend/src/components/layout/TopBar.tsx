@@ -7,7 +7,7 @@ interface TopBarProps {
 
 export function TopBar({ view, onViewChange }: TopBarProps) {
   return (
-    <header className="flex h-16 items-center justify-between bg-[#0B2545] px-6 shrink-0">
+    <header className="flex h-16 items-center justify-between bg-[#183554] px-6 shrink-0">
       <div className="flex items-center gap-6">
         <button className="flex items-center gap-1.5">
           <span className="text-xl font-bold tracking-tight">
@@ -18,10 +18,11 @@ export function TopBar({ view, onViewChange }: TopBarProps) {
             <span className="text-teal-400">y</span>
             <span className="text-sky-400">o</span>
           </span>
-          <ChevronDown className="h-4 w-4 text-slate-400" />
+          <ChevronDown className="h-4 w-4 text-white" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
         </button>
         <div className="h-6 w-px bg-slate-700" />
-        <h1 className="text-lg font-semibold text-white">Rostering</h1>
+        {/* <h1 className="text-lg font-semibold text-white">Rostering</h1> */}
+        <h1 className="text-lg  text-[#DBE0E8]">Rostering</h1>
       </div>
 
       <div className="flex items-center gap-3">

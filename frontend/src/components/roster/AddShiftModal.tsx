@@ -214,6 +214,8 @@ export function AddShiftModal({
 
     '& .MuiPickersSectionList-sectionContent': {
       fontFamily: 'Inter, sans-serif',
+      fontSize: '14px',
+      color: '#334155',
     },
   };
 
@@ -221,7 +223,7 @@ export function AddShiftModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl">
         <div className="mb-5 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-slate-800">
+          <h2 className="text-lg font-semibold text-[#183554]">
             {isEditMode ? 'Edit Shift' : 'Add Shift'}
           </h2>
 
@@ -245,7 +247,7 @@ export function AddShiftModal({
         >
           {participantId !== null && (
             <label className="flex flex-col gap-1.5">
-              <span className="text-sm font-medium text-slate-700">
+              <span className="text-sm font-medium text-[#183554]">
                 Staff member
               </span>
 
@@ -254,7 +256,7 @@ export function AddShiftModal({
                 onChange={(e) =>
                   setCaregiverId(e.target.value)
                 }
-                className="rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-800 focus:border-teal-400 focus:outline-none"
+                className="rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-[#334155] focus:border-teal-400 focus:outline-none"
               >
                 <option value="">
                   Unassigned
@@ -274,7 +276,7 @@ export function AddShiftModal({
 
           <div className="grid grid-cols-2 gap-3">
             <label className="flex flex-col gap-1.5">
-              <span className="text-sm font-medium text-slate-700">
+              <span className="text-sm font-medium text-[#183554]">
                 Start time
               </span>
 
@@ -295,7 +297,7 @@ export function AddShiftModal({
             </label>
 
             <label className="flex flex-col gap-1.5">
-              <span className="text-sm font-medium text-slate-700">
+              <span className="text-sm font-medium text-[#183554]">
                 End time
               </span>
 
@@ -317,7 +319,7 @@ export function AddShiftModal({
           </div>
 
           <label className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium text-slate-700">
+            <span className="text-sm font-medium text-[#183554]">
               Shift type
             </span>
 
@@ -326,7 +328,7 @@ export function AddShiftModal({
               onChange={(e) =>
                 setType(e.target.value as ShiftType)
               }
-              className="rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-800 focus:border-teal-400 focus:outline-none"
+              className="rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-[#334155] focus:border-teal-400 focus:outline-none"
             >
               {TYPE_OPTIONS.map((opt) => (
                 <option

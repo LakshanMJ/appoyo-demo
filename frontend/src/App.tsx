@@ -19,7 +19,7 @@ export default function App() {
       <div className="flex min-h-0 flex-1">
         <SideNav active={activeNav} onSelect={setActiveNav} />
 
-        <main className="flex min-w-0 flex-1 flex-col">
+        <main className="flex min-w-0 flex-1 flex-col bg-[#F2F6F8]">
           <RosterToolbar
             staffName="Luke Anderson"
             timezone="Australia/Brisbane"

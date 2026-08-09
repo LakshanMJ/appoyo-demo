@@ -28,9 +28,9 @@ export function VacantShiftRow({
 }: VacantShiftRowProps) {
   return (
     <>
-      <div className={`flex items-center justify-center p-2 ${cellBorderClasses(0)}`}>
-        <span className="flex items-center gap-1.5 rounded-sm bg-red-50 px-3 py-1.5 text-sm font-medium text-red-500">
-          <AlertCircle className="h-4 w-4" />
+      <div className={`flex items-center align-left p-2 border-1 ${cellBorderClasses(0)}`}>
+        <span className="flex items-center gap-1.5 rounded-sm bg-[#FAE9F1] px-3 py-1.5 text-sm font-medium text-[#791C20]">
+          <AlertCircle className="h-4 w-4 text-[#D81428]" />
           Vacant Shift
         </span>
       </div>
@@ -43,7 +43,10 @@ export function VacantShiftRow({
         return (
           <div
             key={day.isoDate}
-            className={cellBorderClasses(idx + 1)}
+            // className={cellBorderClasses(idx + 1)}
+            className={`border-1 border-[#CBD5E1] ${cellBorderClasses(
+              idx + 1
+            )}`}
           >
             <DayCell
               participantId={null}

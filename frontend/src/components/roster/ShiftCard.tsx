@@ -157,7 +157,7 @@ export function ShiftCard({
       {...listeners}
       {...attributes}
       onClick={() => onClick?.(shift)}
-      className={`group relative cursor-grab overflow-hidden rounded-lg border-l-4 bg-white p-3 font-inter shadow-sm ring-1 ring-black/5 transition-shadow hover:shadow-md active:cursor-grabbing ${isDragging ? 'opacity-40' : ''
+      className={`group relative cursor-grab overflow-hidden rounded-md border-l-2 bg-white p-3 font-inter shadow-sm ring-1 ring-black/5 transition-shadow hover:shadow-md active:cursor-grabbing ${isDragging ? 'opacity-40' : ''
         }`}
     >
       <div
@@ -260,57 +260,29 @@ export function ShiftCard({
             ) : (
               <div className="h-6 w-6 shrink-0 rounded-full bg-slate-300" />
             )}
-            <span className="truncate whitespace-nowrap text-xs font-semibold text-slate-800">
+            {/* <span className="truncate whitespace-nowrap text-xs font-semibold text-slate-800">
+              {caregiver.name}
+            </span> */}
+            <span className="truncate whitespace-nowrap text-xs font-semibold text-[#183554]">
               {caregiver.name}
             </span>
           </>
         ) : (
           <>
             <div className="h-6 w-6 shrink-0 rounded-full bg-slate-200" />
-            <span className="truncate whitespace-nowrap text-xs font-semibold text-slate-500">
+            <span className="truncate whitespace-nowrap text-xs font-semibold text-[#183554]">
               Unassigned
             </span>
           </>
         )}
       </div>
-
-      <p className="mb-1 whitespace-nowrap text-[10px] font-medium text-slate-500">
+      <p className="mb-1 whitespace-nowrap text-[8px] font-bold text-[#183554]">
         {formatShiftTime(shift.startTime)} - {formatShiftTime(shift.endTime)}
       </p>
 
-      {/* <div className="flex items-center justify-between">
-        {config ? (
-          <span className="flex items-center gap-1 rounded-sm bg-[#FFEED4] px-1.5 py-0.5 text-[10px] font-medium text-amber-700">
-            {Icon && <Icon className="h-3 w-3" />}
-            {config.label}
-          </span>
-        ) : (
-          <span className="text-[10px] text-slate-500">Unknown</span>
-        )}
-      </div> */}
-
-      {/* <div className="flex items-center justify-between">
-        {config ? (
-          <span
-            className={`flex items-center gap-1 rounded-sm px-1.5 py-0.5 text-[10px] font-medium ${config.bg} ${config.color}`}
-          >
-            {Icon && (
-              <Icon
-                className={`h-3 w-3 ${config.color}`}
-              />
-            )}
-            {config.label}
-          </span>
-        ) : (
-          <span className="text-[10px] text-slate-500">
-            Unknown
-          </span>
-        )}
-      </div> */}
-
       <div className="flex items-center justify-between">
         {config ? (
-          <span className="flex items-center gap-1 rounded-sm bg-[#FFEED4] px-1.5 py-0.5 text-[10px] font-medium text-amber-700">
+          <span className="flex items-center gap-1 rounded-sm bg-[#FFEED4] px-1.5 py-0.5 text-[8px] font-medium text-[#251926]">
             {Icon && (
               <Icon
                 className={`h-3 w-3 ${config.color}`}
@@ -324,7 +296,6 @@ export function ShiftCard({
           </span>
         )}
       </div>
-
     </div>
   );
 }

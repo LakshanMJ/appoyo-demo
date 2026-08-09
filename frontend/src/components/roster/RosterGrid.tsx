@@ -87,8 +87,8 @@ export function RosterGrid({ weekStart }: RosterGridProps) {
 
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-      <div className="flex-1 overflow-auto rounded-none border border-slate-200 bg-white">
-        <div className="grid grid-cols-[220px_repeat(7,minmax(150px,1fr))]">
+      <div className="flex-1 overflow-auto rounded-none border-2 border-slate-200 bg-[#F2F6F8]">
+        <div className="grid grid-cols-[160px_repeat(7,minmax(150px,1fr))]">
           <GridHeader days={days} />
 
           <VacantShiftRow

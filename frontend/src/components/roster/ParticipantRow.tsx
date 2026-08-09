@@ -10,9 +10,6 @@ import { getShiftRosterDate } from '../../utils/shiftDate';
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-// TODO: source from org/context instead of hardcoding, same as AddShiftModal
-const ORG_TZ = 'Australia/Brisbane';
-
 interface ParticipantRowProps {
   participant: Participant;
   days: DayColumn[];
@@ -27,18 +24,14 @@ interface ParticipantRowProps {
 
 function formatMoney(amount?: number): string {
   if (amount == null) return '$0';
+
   if (amount >= 1000) {
     return `$${Math.round(amount / 1000)}k`;
   }
+
   return `$${amount.toLocaleString('en-AU', {
     maximumFractionDigits: 0,
   })}`;
-}
-
-// Group once per render instead of re-filtering + re-parsing dates
-// for every day column (was O(days * shifts) date parses before).
-function shiftLocalDate(isoString: string): string {
-  return dayjs(isoString).tz(ORG_TZ).format('YYYY-MM-DD');
 }
 
 export function ParticipantRow({
@@ -54,23 +47,43 @@ export function ParticipantRow({
 }: ParticipantRowProps) {
   return (
     <>
-      <div className={`border-b-2 border-slate-200 px-3 py-4 ${cellBorderClasses(0)}`}>
-        <p className="text-[15px] font-semibold text-slate-900">{participant.name}</p>
-        <p className="mt-1 text-sm text-slate-500">
-          Allocated: <span className="font-medium text-teal-600">{formatMoney(participant.allocatedBudget)}</span>
+      {/* Participant column */}
+      <div
+        className={`border-1 border-[#CBD5E1] px-3 pt-1 pb-4 ${cellBorderClasses(0)}`}
+      >
+        <p className="text-[15px] font-semibold text-[#183554]">
+          {participant.name}
         </p>
-        <p className="text-sm text-slate-500">
-          Used: <span className="font-medium text-teal-600">{formatMoney(participant.usedBudget)}</span>
+
+        <p className="mt-1 text-xs text-[#183554]">
+          Allocated:{' '}
+          <span className="font-medium text-[#1DBF87]">
+            {formatMoney(participant.allocatedBudget)}
+          </span>
+        </p>
+
+        <p className="text-xs text-[#183554]">
+          Used:{' '}
+          <span className="font-medium text-[#1DBF87]">
+            {formatMoney(participant.usedBudget)}
+          </span>
         </p>
       </div>
 
+      {/* Day cells */}
       {days.map((day, idx) => (
-        <div key={day.isoDate} className={`border-b-2 border-slate-200 ${cellBorderClasses(idx + 1)}`}>
+        <div
+          key={day.isoDate}
+          className={`border-1 border-[#CBD5E1] ${cellBorderClasses(
+            idx + 1
+          )}`}
+        >
           <DayCell
             participantId={participant.id}
             isoDate={day.isoDate}
             shifts={shifts.filter(
-              (shift) => getShiftRosterDate(shift.startTime) === day.isoDate
+              (shift) =>
+                getShiftRosterDate(shift.startTime) === day.isoDate
             )}
             loadCaregivers={loadCaregivers}
             onAddShift={onAddShift}
