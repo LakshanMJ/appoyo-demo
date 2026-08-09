@@ -4,9 +4,11 @@ import { X } from "lucide-react";
 interface Props {
   onClose: () => void;
   onSubmit: (data: {
-    name: string;
+    firstName: string;
+    lastName: string;
     phone: string;
-    address: string;
+    addressLine1: string;
+    addressLine2: string;
     allocatedBudget: number;
   }) => void;
 }
@@ -15,18 +17,22 @@ export function AddParticipantModal({
   onClose,
   onSubmit,
 }: Props) {
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
+  const [addressLine1, setAddressLine1] = useState("");
+  const [addressLine2, setAddressLine2] = useState("");
   const [allocatedBudget, setAllocatedBudget] = useState("");
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name.trim()) return;
+    if (!firstName.trim() || !lastName.trim()) return;
     onSubmit({
-      name,
+      firstName,
+      lastName,
       phone,
-      address,
+      addressLine1,
+      addressLine2,
       allocatedBudget: Number(allocatedBudget) || 0,
     });
     onClose();
@@ -46,9 +52,16 @@ export function AddParticipantModal({
 
         <form onSubmit={handleSubmit} className="space-y-3">
           <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Participant name"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            placeholder="First name"
+            className="w-full rounded-lg border border-slate-200 p-2 text-[14px] focus:border-teal-400 focus:outline-none"
+          />
+
+          <input
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            placeholder="Last name"
             className="w-full rounded-lg border border-slate-200 p-2 text-[14px] focus:border-teal-400 focus:outline-none"
           />
 
@@ -59,11 +72,18 @@ export function AddParticipantModal({
             className="w-full rounded-lg border p-2 border border-slate-200 text-[14px] focus:border-teal-400 focus:outline-none"
           />
 
-          <textarea
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            placeholder="Address"
-            className="w-full rounded-lg border p-2 border border-slate-200 text-[14px] focus:border-teal-400 focus:outline-none"
+          <input
+            value={addressLine1}
+            onChange={(e) => setAddressLine1(e.target.value)}
+            placeholder="Address line one"
+            className="w-full rounded-lg border border-slate-200 p-2 text-[14px] focus:border-teal-400 focus:outline-none"
+          />
+
+          <input
+            value={addressLine2}
+            onChange={(e) => setAddressLine2(e.target.value)}
+            placeholder="Address line two"
+            className="w-full rounded-lg border border-slate-200 p-2 text-[14px] focus:border-teal-400 focus:outline-none"
           />
 
           <input

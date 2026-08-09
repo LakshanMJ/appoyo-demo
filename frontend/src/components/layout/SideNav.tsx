@@ -27,7 +27,6 @@ interface SideNavProps {
 
 export function SideNav({ active, onSelect }: SideNavProps) {
   return (
-    // <nav className="flex w-60 shrink-0 flex-col gap-0.5 bg-[#0B2545] px-0 py-4">
     <nav className="flex w-60 shrink-0 flex-col gap-0.5 bg-[#183554] px-0 py-4">
       {NAV_ITEMS.map((item) => {
         const isActive = item.label === active;

@@ -43,7 +43,6 @@ export function VacantShiftRow({
         return (
           <div
             key={day.isoDate}
-            // className={cellBorderClasses(idx + 1)}
             className={`border-1 border-[#CBD5E1] ${cellBorderClasses(
               idx + 1
             )}`}

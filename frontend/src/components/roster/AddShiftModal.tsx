@@ -23,8 +23,6 @@ interface AddShiftModalProps {
   participants: { id: string; name: string }[];
   isoDate: string;
 
-  // Pass the shift being edited to switch the modal into edit mode.
-  // Omit (or pass undefined) for create mode.
   editingShift?: Shift | null;
 
   onClose: () => void;
@@ -36,7 +34,6 @@ interface AddShiftModalProps {
     message?: string;
   }>;
 
-  // Called instead of onSubmit when editingShift is provided.
   onUpdate?: (
     shiftId: string,
     dto: CreateShiftDto
@@ -65,7 +62,6 @@ export function AddShiftModal({
   onSubmit,
   onUpdate,
   caregivers,
-  participants,
 }: AddShiftModalProps) {
   const isEditMode = Boolean(editingShift);
 
@@ -82,13 +78,8 @@ export function AddShiftModal({
 
   const [hasAlert, setHasAlert] = useState(true);
 
-  // The roster day this shift belongs to. In create mode this is
-  // fixed to the day the user clicked. In edit mode we derive it
-  // from the shift's own start time so we don't accidentally move
-  // the shift to a different day just by opening the modal.
   const [shiftDate, setShiftDate] = useState(isoDate);
 
-  // Pre-fill the form when editing an existing shift.
   useEffect(() => {
     if (!editingShift) return;
 
@@ -160,10 +151,8 @@ export function AddShiftModal({
       participantId: finalParticipantId || null,
       caregiverId: caregiverId || null,
 
-      // Keep the roster date too if your DTO supports it.
       date: shiftDate,
 
-      // Store UTC in backend.
       startTime: startDateTime.toISOString(),
       endTime: endDateTime.toISOString(),
 

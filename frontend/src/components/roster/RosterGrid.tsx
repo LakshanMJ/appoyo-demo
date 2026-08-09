@@ -153,7 +153,6 @@ export function RosterGrid({ weekStart }: RosterGridProps) {
 
       {modalTarget && (
         <AddShiftModal
-          participants={participants}
           caregivers={caregivers}
           participantId={modalTarget.participantId}
           isoDate={modalTarget.isoDate}

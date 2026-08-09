@@ -21,7 +21,6 @@ export function TopBar({ view, onViewChange }: TopBarProps) {
           <ChevronDown className="h-4 w-4 text-white" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
         </button>
         <div className="h-6 w-px bg-slate-700" />
-        {/* <h1 className="text-lg font-semibold text-white">Rostering</h1> */}
         <h1 className="text-lg  text-[#DBE0E8]">Rostering</h1>
       </div>
 

@@ -47,12 +47,11 @@ export function ParticipantRow({
 }: ParticipantRowProps) {
   return (
     <>
-      {/* Participant column */}
       <div
         className={`border-1 border-[#CBD5E1] px-3 pt-1 pb-4 ${cellBorderClasses(0)}`}
       >
         <p className="text-[15px] font-semibold text-[#183554]">
-          {participant.name}
+          {[participant.firstName, participant.lastName].filter(Boolean).join(' ')}
         </p>
 
         <p className="mt-1 text-xs text-[#183554]">
@@ -70,7 +69,6 @@ export function ParticipantRow({
         </p>
       </div>
 
-      {/* Day cells */}
       {days.map((day, idx) => (
         <div
           key={day.isoDate}

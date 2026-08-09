@@ -176,7 +176,6 @@ export function ShiftCard({
           e.stopPropagation();
           toggleMenu();
         }}
-        // className="absolute right-1 top-1 z-10 rounded p-1 text-slate-400 opacity-0 transition-opacity hover:bg-slate-100 hover:text-slate-600 group-hover:opacity-100 data-[open=true]:opacity-100 data-[open=true]:bg-slate-100"
         className="absolute right-1 top-1 z-10 rounded p-1 text-slate-400 opacity-0 transition-opacity hover:text-slate-600 group-hover:opacity-100 data-[open=true]:opacity-100"
         data-open={menuOpen}
         aria-label="Shift options"
@@ -201,7 +200,6 @@ export function ShiftCard({
             }}
             className="z-50 overflow-hidden rounded-lg border border-slate-200/80 bg-white p-1 shadow-[0_4px_16px_rgba(15,23,42,0.12)]"
           >
-            {/* Edit */}
             <button
               type="button"
               role="menuitem"
@@ -216,7 +214,6 @@ export function ShiftCard({
               <IoPencil className="h-3.5 w-3.5" />
             </button>
 
-            {/* Duplicate */}
             <button
               type="button"
               role="menuitem"
@@ -230,7 +227,6 @@ export function ShiftCard({
               <IoCopy className="h-3.5 w-3.5" />
             </button>
 
-            {/* Delete */}
             <button
               type="button"
               role="menuitem"
@@ -260,9 +256,6 @@ export function ShiftCard({
             ) : (
               <div className="h-6 w-6 shrink-0 rounded-full bg-slate-300" />
             )}
-            {/* <span className="truncate whitespace-nowrap text-xs font-semibold text-slate-800">
-              {caregiver.name}
-            </span> */}
             <span className="truncate whitespace-nowrap text-xs font-semibold text-[#183554]">
               {caregiver.name}
             </span>

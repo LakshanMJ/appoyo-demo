@@ -74,9 +74,12 @@ export function DayCell({
         ) : (
           <button
             onClick={() => onAddShift(participantId, isoDate)}
-            className="flex flex-1 items-center justify-center rounded-sm border border-dashed border-slate-200 text-slate-300 hover:border-teal-400 hover:text-teal-500"
+            className="flex flex-1 items-center justify-center rounded-sm border border-dashed text-slate-300 hover:border-teal-400 hover:text-teal-500"
           >
-            <span className="h-px w-5 bg-current" />
+            <span
+              className={`h-px w-5 bg-[#94A3B8] ${compact ? 'translate-y-px' : ''
+                }`}
+            />
           </button>
         ))}
     </div>

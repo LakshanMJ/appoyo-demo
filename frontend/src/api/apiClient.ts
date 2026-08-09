@@ -58,9 +58,11 @@ export const rosterApi = {
     },
 
     create: async (data: {
-      name: string;
+      firstName: string;
+      lastName: string;
       phone?: string;
-      address?: string;
+      addressLine1: string;
+      addressLine2: string;
       allocatedBudget?: number;
     }) => {
       const response = await api.post('/participants', data);

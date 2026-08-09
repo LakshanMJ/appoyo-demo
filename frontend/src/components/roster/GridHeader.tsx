@@ -9,7 +9,6 @@ export function GridHeader({ days }: GridHeaderProps) {
   return (
     <>
       <div
-        // className={`sticky top-0 z-10 border-b-1 border-[#DFE0F0] bg-[#EBEFF0] h-10 flex items-center px-3 py-4 text-left text-[15px] font-semibold text-slate-800 ${cellBorderClasses(0)}`}
         className={`sticky top-0 z-10 border-b-1 border-[#DCE1E5] bg-[#EBEFF0] h-10 flex items-center px-3 text-left text-[15px] font-semibold text-[#183554] ${cellBorderClasses(0)}`}
       >
         Participant

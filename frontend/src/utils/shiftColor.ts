@@ -1,9 +1,3 @@
-// The screenshot shows each shift card with a colored left border + tinted
-// background. The color isn't random per-render — it stays consistent for
-// the same staff member across the whole grid. We derive it deterministically
-// from staffId so the same person always gets the same color, without the
-// backend needing to store a color field.
-
 export const SHIFT_PALETTE = [
   { name: 'red', border: '#EF4444', bg: '#FEF2F2' },
   { name: 'purple', border: '#A855F7', bg: '#FAF5FF' },

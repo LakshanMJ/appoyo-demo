@@ -1,12 +1,10 @@
 import { create } from 'zustand';
-import { MOCK_SHIFTS, MOCK_VACANT_SHIFTS, PARTICIPANTS, STAFF } from '../data/mockData';
+import { MOCK_SHIFTS, MOCK_VACANT_SHIFTS, STAFF } from '../data/mockData';
 import { rosterApi } from '../api/apiClient';
 import type { Caregiver, CreateShiftDto, Participant, Shift } from '../types/roster';
 import axios from 'axios';
 import { moveShiftToDate } from '../utils/shiftDate';
 
-// Toggle this to false once your NestJS endpoints are live —
-// it lets the frontend be built and demoed independently of the backend.
 const USE_MOCK_DATA = false;
 
 interface RosterStore {
@@ -16,14 +14,15 @@ interface RosterStore {
   caregivers: Caregiver[];
   isLoading: boolean;
 
-  loadWeek: (weekStartIso: string) => Promise<void>;
   loadCaregivers: () => Promise<void>;
   loadParticipants: () => Promise<void>;
   loadShifts: (startDate: string, endDate: string) => Promise<void>;
   createParticipant: (data: {
-    name: string;
+    firstName: string;
+    lastName: string;
     phone?: string;
-    address?: string;
+    addressLine1: string;
+    addressLine2: string;
     allocatedBudget?: number;
   }) => Promise<void>;
   moveShift: (shiftId: string, targetParticipantId: string | null, targetDate: string) => Promise<void>;
@@ -46,21 +45,19 @@ interface RosterStore {
     success: boolean;
     message?: string;
   }>;
-  duplicateShift: (shift: Shift) => Promise<void>;
 }
 
 
 
 
 export const useRosterStore = create<RosterStore>((set, get) => ({
-  // participants: PARTICIPANTS,
   participants: [],
   shifts: MOCK_SHIFTS,
   vacantShifts: MOCK_VACANT_SHIFTS,
   caregivers: [],
   isLoading: false,
 
-  // 1 - working
+  // 1
   loadCaregivers: async () => {
     try {
       const caregivers = await rosterApi.caregivers.getAll();
@@ -75,7 +72,7 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
     }
   },
 
-  //2 - working
+  //2
   createParticipant: async (data) => {
     try {
       const participant = await rosterApi.participants.create(data);
@@ -90,7 +87,7 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
     }
   },
 
-  // 3 - working
+  // 3
   loadParticipants: async () => {
     try {
       const participants = await rosterApi.participants.getAll();
@@ -102,7 +99,7 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
     }
   },
 
-  // 4 - working
+  // 4
   createShift: async (dto) => {
     console.log(dto, 'createShift dto')
     const tempId = `temp-${Date.now()}`;
@@ -157,8 +154,7 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
     }
   },
 
-  // 5 - working
-  // get the shifts for the current week and update the store
+  // 5
   loadShifts: async (startDate, endDate) => {
     try {
       const shifts = await rosterApi.shifts.getAll(
@@ -174,7 +170,7 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
     }
   },
 
-  // 6 - working
+  // 6
   moveShift: async (
     shiftId,
     targetParticipantId,
@@ -235,12 +231,6 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
       endTime,
     };
 
-    /*
-     * Optimistic update.
-     *
-     * If participantId exists → participant row
-     * If participantId is null → vacant row
-     */
     set({
       shifts: [
         ...prevShifts.filter(
@@ -261,9 +251,6 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
       ],
     });
 
-    /*
-     * Persist the move to backend.
-     */
     try {
       if (USE_MOCK_DATA) {
         return;
@@ -342,7 +329,6 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
     const prevShifts = get().shifts;
     const prevVacantShifts = get().vacantShifts;
 
-    // Optimistic UI update
     set({
       shifts: prevShifts.filter(
         (shift) => shift.id !== shiftId
@@ -368,7 +354,6 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
         err
       );
 
-      // Roll back if backend fails
       set({
         shifts: prevShifts,
         vacantShifts: prevVacantShifts,
@@ -388,50 +373,5 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
         message: 'Unexpected error occurred',
       };
     }
-  },
-
-  // ......................................................check and delete.................................................................
-  loadWeek: async (weekStartIso) => {
-    if (USE_MOCK_DATA) return; // mock data is already loaded synchronously
-    set({ isLoading: true });
-    try {
-      const week = await rosterApi.getWeek(weekStartIso);
-      set({
-        participants: week.participants,
-        shifts: week.shifts,
-        vacantShifts: week.vacantShifts,
-        isLoading: false,
-      });
-    } catch (err) {
-      console.error('Failed to load roster week', err);
-      set({ isLoading: false });
-    }
-  },
-
-  // 2
-  getStaff: (staffId) => STAFF[staffId] ?? { id: staffId, name: 'Unknown Staff' },
-
-  // 5
-  duplicateShift: async (shift) => {
-    await get().createShift({
-      participantId: shift.participantId,
-      staffId: shift.staffId,
-      date: shift.date,
-      startTime: shift.startTime,
-      endTime: shift.endTime,
-      tag: shift.tag,
-      hasAlert: shift.hasAlert,
-    });
-  },
-
-  // 6
-  addParticipant: (name) => {
-    const newParticipant: Participant = {
-      id: `p-${Date.now()}`,
-      name,
-      allocatedBudgetCents: 0,
-      usedBudgetCents: 0,
-    };
-    set((state) => ({ participants: [...state.participants, newParticipant] }));
   },
 }));

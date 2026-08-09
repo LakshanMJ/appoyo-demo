@@ -1,9 +1,3 @@
-import { format } from "date-fns";
-
-// export function formatShiftTime(date: string) {
-//   return format(new Date(date), "h:mm a");
-// }
-
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
