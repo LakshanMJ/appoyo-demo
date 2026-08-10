@@ -13,11 +13,11 @@ export function AddParticipantRow({ days, onAddParticipant, onAddShift }: AddPar
     <>
       <div className={`px-3 py-3 border-1 ${cellBorderClasses(0)}`}>
         <button
-          onClick={onAddParticipant}
-          className="w-full whitespace-nowrap rounded-lg bg-[#0B2545] px-4 py-2.5 text-sm font-medium text-[#DBE0E8] hover:bg-[#132C50]"
-        >
-          Add Participant
-        </button>
+  onClick={onAddParticipant}
+  className="w-full whitespace-nowrap rounded-lg bg-[#0B2545] px-4 py-2.5 text-sm font-medium text-[#DBE0E8] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#163A66] hover:text-white hover:shadow-md active:translate-y-0"
+>
+  Add Participant
+</button>
       </div>
       {days.map((day, idx) => (
         <div key={day.isoDate} className={`px-3 py-3 border-1 ${cellBorderClasses(idx + 1)}`}>
