@@ -26,6 +26,11 @@ export class ShiftsController {
     @Query('startDate') startDate: string,
     @Query('endDate') endDate: string,
   ) {
+    console.log('CONTROLLER GET /shifts:', {
+    startDate,
+    endDate,
+  });
+
     return this.shiftsService.findAll(startDate, endDate);
   }
 
@@ -47,10 +52,6 @@ export class ShiftsController {
     @Param('id') id: string,
     @Body() dto: MoveShiftDto,
   ) {
-    console.log('MOVE CONTROLLER BODY:', dto);
-    console.log('startTime:', dto.startTime);
-    console.log('endTime:', dto.endTime);
-    console.log('participantId:', dto.participantId);
     return this.shiftsService.move(id, dto);
   }
 }
