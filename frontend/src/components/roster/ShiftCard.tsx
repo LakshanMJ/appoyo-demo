@@ -15,6 +15,7 @@ import type { Caregiver, Shift } from '../../types/roster';
 import { getShiftColor } from '../../utils/shiftColor';
 import { formatShiftTime } from '../../utils/time';
 import { MoreVertical } from 'lucide-react';
+import { FaUser } from "react-icons/fa";
 
 interface ShiftCardProps {
   shift: Shift;
@@ -262,7 +263,10 @@ export function ShiftCard({
           </>
         ) : (
           <>
-            <div className="h-6 w-6 shrink-0 rounded-full bg-slate-200" />
+            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-200">
+              <FaUser className="h-3 w-3 text-slate-400" />
+            </div>
+
             <span className="truncate whitespace-nowrap text-xs font-semibold text-[#183554]">
               Unassigned
             </span>

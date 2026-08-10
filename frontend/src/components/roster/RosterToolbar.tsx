@@ -1,5 +1,6 @@
-import { Calendar, ChevronDown, ChevronLeft, ChevronRight, Copy, Filter, MoreHorizontal, Upload, User } from 'lucide-react';
+import { Calendar, ChevronDown, ChevronLeft, ChevronRight, Copy, Filter, MoreHorizontal, Upload } from 'lucide-react';
 import { formatWeekRange } from '../../utils/week';
+import { FaUser } from "react-icons/fa";
 
 interface RosterToolbarProps {
   staffName: string;
@@ -22,7 +23,7 @@ export function RosterToolbar({
     <div className="flex items-center justify-between gap-3 px-6 py-4">
       <div className="flex items-center gap-3">
         <button className="flex h-9 items-center gap-2 rounded-lg bg-teal-600 px-3 py-2 text-[13px] font-medium text-white whitespace-nowrap hover:bg-teal-700">
-          <User className="h-4 w-4 shrink-0" />
+          <FaUser className="h-4 w-4 shrink-0" />
           <span>{staffName} - {timezone}</span>
           <ChevronDown className="h-4 w-4 shrink-0" />
         </button>
