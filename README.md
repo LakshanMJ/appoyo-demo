@@ -5,6 +5,7 @@ A roster management interface built as a technical demo, inspired by the Appoyo 
 ## Demo
 
 The demo showcases the main roster functionality, including shift management, drag-and-drop scheduling, and backend scheduling validations.
+
 [▶️ Watch the Demo Video](https://drive.google.com/file/d/1cFp1tHoCljfoh0H_GwMLdzx06wWfzxL_/view?usp=drive_link)
 
 ## Features
