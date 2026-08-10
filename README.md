@@ -2,6 +2,11 @@
 
 A roster management interface built as a technical demo, inspired by the Appoyo roster experience.
 
+## Demo
+
+The demo showcases the main roster functionality, including shift management, drag-and-drop scheduling, and backend scheduling validations.
+[🎥 Watch Demo](https://github.com/user-attachments/assets/057a861d-36f9-481e-8965-d033e960714c)
+
 ## Features
 
 * Weekly roster/calendar view
@@ -59,9 +64,4 @@ npm run start:dev
 ```
 
 Make sure the backend database is configured before starting the application.
-
-## Demo
-
-The demo showcases the main roster functionality, including shift management, drag-and-drop scheduling, and backend scheduling validations.
-[🎥 Watch Demo](https://github.com/user-attachments/assets/057a861d-36f9-481e-8965-d033e960714c)
 Built as a technical demonstration for Appoyo.
