@@ -92,11 +92,11 @@ export function ShiftCard({
     const spaceAbove = rect.top;
 
     const openRight = spaceRight >= MENU_WIDTH || spaceRight >= spaceLeft;
-    const left = openRight
-      ? rect.right - MENU_WIDTH
-        ? rect.left
-        : rect.left
-      : rect.right - MENU_WIDTH;
+    // const left = openRight
+    //   ? rect.right - MENU_WIDTH
+    //     ? rect.left
+    //     : rect.left
+    //   : rect.right - MENU_WIDTH;
 
     const openBelow = spaceBelow >= MENU_HEIGHT || spaceBelow >= spaceAbove;
     const top = openBelow ? rect.bottom + GAP : rect.top - MENU_HEIGHT - GAP;

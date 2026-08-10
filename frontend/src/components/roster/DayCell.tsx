@@ -11,7 +11,7 @@ interface DayCellProps {
   onAddShift: (participantId: string | null, isoDate: string) => void;
   onEditShift: (shift: Shift) => void;
   onDeleteShift: (shift: Shift) => void;
-  onDuplicateShift: (shift: Shift) => void;
+  // onDuplicateShift: (shift: Shift) => void;
   onShiftClick: (shift: Shift) => void;
   emptyVariant?: 'dash' | 'button';
   compact?: boolean;
@@ -25,7 +25,7 @@ export function DayCell({
   onAddShift,
   onEditShift,
   onDeleteShift,
-  onDuplicateShift,
+  // onDuplicateShift,
   onShiftClick,
   emptyVariant = 'dash',
   compact = false,
@@ -57,7 +57,7 @@ export function DayCell({
           }
           onEditShift={onEditShift}
           onDelete={onDeleteShift}
-          onDuplicate={onDuplicateShift}
+          // onDuplicate={onDuplicateShift}
           onClick={onShiftClick}
         />
       ))}

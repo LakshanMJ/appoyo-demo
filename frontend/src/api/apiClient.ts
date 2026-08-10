@@ -14,24 +14,26 @@ export const rosterApi = {
   },
 
   shifts: {
-    create: async (dto) => {
+    create: async (dto:any) => {
       const response = await api.post("/shifts", dto);
       return response.data;
     },
     getAll: async (startDate: string, endDate: string) => {
+        console.time('GET /shifts');
       const response = await api.get('/shifts', {
         params: {
           startDate,
           endDate,
         },
       });
+       console.timeEnd('GET /shifts');
       return response.data;
     },
     delete: async (shiftId: string) => {
       const response = await api.delete(`/shifts/${shiftId}`);
       return response.data;
     },
-    moveShift: async (data) => {
+    moveShift: async (data:any) => {
       const response = await api.patch(
         `/shifts/${data.shiftId}/move`,
         {
@@ -42,7 +44,7 @@ export const rosterApi = {
       );
       return response.data;
     },
-    update: async (shiftId, dto) => {
+    update: async (shiftId:any, dto:any) => {
       const response = await api.patch(
         `/shifts/${shiftId}`,
         dto

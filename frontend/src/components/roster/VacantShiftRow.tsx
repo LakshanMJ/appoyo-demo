@@ -10,7 +10,7 @@ interface VacantShiftRowProps {
   shifts: Shift[];
   loadCaregivers: (caregiverId: string) => Caregiver | undefined;
   onAddShift: (participantId: string | null, isoDate: string) => void;
-  onDuplicateShift: (shift: Shift) => void;
+  // onDuplicateShift: (shift: Shift) => void;
   onEditShift: (shift: Shift) => void;
   onDeleteShift: (shift: Shift) => void; 
   onShiftClick: (shift: Shift) => void;
@@ -23,7 +23,7 @@ export function VacantShiftRow({
   onAddShift,
   onEditShift,
   onDeleteShift,
-  onDuplicateShift,
+  // onDuplicateShift,
   onShiftClick,
 }: VacantShiftRowProps) {
   return (
@@ -53,7 +53,7 @@ export function VacantShiftRow({
               shifts={dayShifts}
               loadCaregivers={loadCaregivers}
               onAddShift={onAddShift}
-              onDuplicateShift={onDuplicateShift}
+              // onDuplicateShift={onDuplicateShift}
               onEditShift={onEditShift}
               onDeleteShift={onDeleteShift} 
               onShiftClick={onShiftClick}

@@ -26,7 +26,7 @@ export default function App() {
             weekStart={weekStart}
             onPrevWeek={() => setWeekStart((w) => prevWeek(w))}
             onNextWeek={() => setWeekStart((w) => nextWeek(w))}
-            onPublish={() => alert('Publish shifts -> POST /rosters/publish')}
+            onPublish={() => {}}
           />
 
           <div className="flex min-h-0 flex-1 flex-col px-0 pb-0">

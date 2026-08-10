@@ -37,7 +37,6 @@ export function RosterGrid({ weekStart }: RosterGridProps) {
     createShift,
     updateShift,
     deleteShift,
-    duplicateShift,
     createParticipant
   } = useRosterStore();
 
@@ -105,7 +104,7 @@ export function RosterGrid({ weekStart }: RosterGridProps) {
             }
             onEditShift={handleEditShift}
             onDeleteShift={handleDeleteShift}
-            onDuplicateShift={duplicateShift}
+            // onDuplicateShift={duplicateShift}
             onShiftClick={() => { }}
           />
 
@@ -123,7 +122,7 @@ export function RosterGrid({ weekStart }: RosterGridProps) {
               }
               onEditShift={handleEditShift}
               onDeleteShift={handleDeleteShift}
-              onDuplicateShift={duplicateShift}
+              // onDuplicateShift={duplicateShift}
               onShiftClick={() => { }}
             />
           ))}

@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { MOCK_SHIFTS, MOCK_VACANT_SHIFTS, STAFF } from '../data/mockData';
 import { rosterApi } from '../api/apiClient';
 import type { Caregiver, CreateShiftDto, Participant, Shift } from '../types/roster';
 import axios from 'axios';
@@ -47,13 +46,10 @@ interface RosterStore {
   }>;
 }
 
-
-
-
 export const useRosterStore = create<RosterStore>((set, get) => ({
   participants: [],
-  shifts: MOCK_SHIFTS,
-  vacantShifts: MOCK_VACANT_SHIFTS,
+  shifts: [],
+  vacantShifts: [],
   caregivers: [],
   isLoading: false,
 
@@ -162,8 +158,8 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
         endDate
       );
       set({
-        shifts: shifts.filter((s) => s.participantId),
-        vacantShifts: shifts.filter((s) => !s.participantId),
+        shifts: shifts.filter((s:any) => s.participantId),
+        vacantShifts: shifts.filter((s:any) => !s.participantId),
       });
     } catch (error) {
       console.error('Failed loading shifts', error);

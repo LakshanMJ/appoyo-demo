@@ -20,7 +20,7 @@ const ORG_TZ = 'Australia/Brisbane';
 interface AddShiftModalProps {
   participantId: string | null;
   caregivers: Caregiver[];
-  participants: { id: string; name: string }[];
+  // participants: { id: string; name: string }[];
   isoDate: string;
 
   editingShift?: Shift | null;
@@ -118,20 +118,6 @@ export function AddShiftModal({
       return;
     }
 
-    /*
-     * shiftDate is the roster day this shift belongs to — the day
-     * the user clicked (create mode) or the shift's original day
-     * (edit mode).
-     *
-     * Example:
-     * shiftDate = "2026-08-05"
-     * startTime = "09:00"
-     *
-     * This creates:
-     * 2026-08-05 09:00 Australia/Brisbane
-     *
-     * Then toISOString() converts it to UTC for the backend.
-     */
     const startDateTime = dayjs.tz(
       `${shiftDate} ${startTime.format('HH:mm:ss')}`,
       'YYYY-MM-DD HH:mm:ss',
@@ -281,6 +267,53 @@ export function AddShiftModal({
                     fullWidth: true,
                     sx: timePickerSx,
                   },
+                  desktopPaper: {
+                    sx: {
+                      fontFamily: 'Inter, sans-serif',
+
+                      '& .MuiMultiSectionDigitalClock-root': {
+                        fontFamily: 'Inter, sans-serif',
+                      },
+
+                      '& .MuiMultiSectionDigitalClockSection-root': {
+                        fontFamily: 'Inter, sans-serif',
+                      },
+
+                      '& .MuiMultiSectionDigitalClockSection-item': {
+                        fontFamily: 'Inter, sans-serif',
+                        fontSize: '14px',
+                        color: '#334155',
+                        borderRadius: '6px',
+
+                        '&:hover': {
+                          backgroundColor: '#f0fdfa',
+                        },
+
+                        '&.Mui-selected': {
+                          backgroundColor: '#ccfbf1',
+                          color: '#0f766e',
+                          fontWeight: 600,
+                        },
+                      },
+
+                      '& .MuiDialogActions-root': {
+                        padding: '8px 16px 12px',
+                      },
+
+                      '& .MuiDialogActions-root .MuiButton-root': {
+                        fontFamily: 'Inter, sans-serif',
+                        fontSize: '14px',
+                        fontWeight: 600,
+                        textTransform: 'none',
+                        color: '#0f766e',
+                        borderRadius: '6px',
+
+                        '&:hover': {
+                          backgroundColor: '#f0fdfa',
+                        },
+                      },
+                    },
+                  },
                 }}
               />
             </label>
@@ -301,6 +334,53 @@ export function AddShiftModal({
                     size: 'small',
                     fullWidth: true,
                     sx: timePickerSx,
+                  },
+                  desktopPaper: {
+                    sx: {
+                      fontFamily: 'Inter, sans-serif',
+
+                      '& .MuiMultiSectionDigitalClock-root': {
+                        fontFamily: 'Inter, sans-serif',
+                      },
+
+                      '& .MuiMultiSectionDigitalClockSection-root': {
+                        fontFamily: 'Inter, sans-serif',
+                      },
+
+                      '& .MuiMultiSectionDigitalClockSection-item': {
+                        fontFamily: 'Inter, sans-serif',
+                        fontSize: '14px',
+                        color: '#334155',
+                        borderRadius: '6px',
+
+                        '&:hover': {
+                          backgroundColor: '#f0fdfa',
+                        },
+
+                        '&.Mui-selected': {
+                          backgroundColor: '#ccfbf1',
+                          color: '#0f766e',
+                          fontWeight: 600,
+                        },
+                      },
+
+                      '& .MuiDialogActions-root': {
+                        padding: '8px 16px 12px',
+                      },
+
+                      '& .MuiDialogActions-root .MuiButton-root': {
+                        fontFamily: 'Inter, sans-serif',
+                        fontSize: '14px',
+                        fontWeight: 600,
+                        textTransform: 'none',
+                        color: '#0f766e',
+                        borderRadius: '6px',
+
+                        '&:hover': {
+                          backgroundColor: '#f0fdfa',
+                        },
+                      },
+                    },
                   },
                 }}
               />
