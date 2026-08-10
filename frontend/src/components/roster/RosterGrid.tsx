@@ -75,12 +75,33 @@ export function RosterGrid({ weekStart }: RosterGridProps) {
     setDeleteTarget(shift);
   }
 
+  // useEffect(() => {
+  //   loadCaregivers();
+  //   loadParticipants();
+  //   loadShifts(
+  //     days[0].isoDate,
+  //     days[6].isoDate
+  //   );
+  // }, [weekStart]);
+
   useEffect(() => {
+    console.log('LOADING SHIFTS WITH:', {
+      firstDay: days[0]?.isoDate,
+      lastDay: days[6]?.isoDate,
+      days,
+    });
+
     loadCaregivers();
     loadParticipants();
+
+    if (!days[0]?.isoDate || !days[6]?.isoDate) {
+      console.warn('Skipping shift load: invalid days');
+      return;
+    }
+
     loadShifts(
       days[0].isoDate,
-      days[6].isoDate
+      days[6].isoDate,
     );
   }, [weekStart]);
 

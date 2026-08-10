@@ -3,6 +3,7 @@ import { rosterApi } from '../api/apiClient';
 import type { Caregiver, CreateShiftDto, Participant, Shift } from '../types/roster';
 import axios from 'axios';
 import { moveShiftToDate } from '../utils/shiftDate';
+import { toast } from 'sonner';
 
 const USE_MOCK_DATA = false;
 
@@ -97,7 +98,6 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
 
   // 4
   createShift: async (dto) => {
-    console.log(dto, 'createShift dto')
     const tempId = `temp-${Date.now()}`;
     const optimisticShift: Shift = {
       ...dto,
@@ -158,8 +158,8 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
         endDate
       );
       set({
-        shifts: shifts.filter((s:any) => s.participantId),
-        vacantShifts: shifts.filter((s:any) => !s.participantId),
+        shifts: shifts.filter((s: any) => s.participantId),
+        vacantShifts: shifts.filter((s: any) => !s.participantId),
       });
     } catch (error) {
       console.error('Failed loading shifts', error);
@@ -258,7 +258,7 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
         startTime,
         endTime,
       });
-    } catch (err) {
+    } catch (err: any) {
       console.error(
         'Failed to move shift, rolling back',
         err,
@@ -268,6 +268,17 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
         shifts: prevShifts,
         vacantShifts: prevVacant,
       });
+
+      toast.error(
+        err.response?.data?.message || 'Unable to move shift.',
+        {
+          style: {
+            background: '#FEF2F2',
+            color: '#DC2626',
+            border: '1px solid #FECACA',
+          },
+        },
+      );
     }
   },
 

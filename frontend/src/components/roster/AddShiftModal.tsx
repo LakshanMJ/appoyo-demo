@@ -223,7 +223,7 @@ export function AddShiftModal({
           {participantId !== null && (
             <label className="flex flex-col gap-1.5">
               <span className="text-sm font-medium text-[#183554]">
-                Staff member
+                Caregiver
               </span>
 
               <select

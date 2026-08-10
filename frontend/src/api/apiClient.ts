@@ -19,13 +19,18 @@ export const rosterApi = {
       return response.data;
     },
     getAll: async (startDate: string, endDate: string) => {
-        console.time('GET /shifts');
+        console.log('GET ALL DATES:', {
+    startDate,
+    endDate,
+  });
+  console.time('GET /shifts');
       const response = await api.get('/shifts', {
         params: {
           startDate,
           endDate,
         },
       });
+       console.timeEnd('GET /shifts');
        console.timeEnd('GET /shifts');
       return response.data;
     },
