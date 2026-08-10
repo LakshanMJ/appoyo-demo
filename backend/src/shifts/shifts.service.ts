@@ -3,8 +3,6 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateShiftDto } from './dto/create-shift.dto';
 import type { CheckConflictDto } from './dto/check-conflict.dto';
 import type { MoveShiftDto } from './dto/move-shift.dto';
-// import { UpdateShiftDto } from './dto/update-shift.dto';
-// import { GetShiftsDto } from './dto/get-shifts.dto';
 
 @Injectable()
 export class ShiftsService {
@@ -69,7 +67,6 @@ export class ShiftsService {
         startTime: new Date(dto.startTime),
         endTime: new Date(dto.endTime),
         type: dto.type,
-        // hasAlert: dto.hasAlert ?? false,
       },
     });
   }
@@ -100,7 +97,7 @@ export class ShiftsService {
     });
   }
 
-  // Standalone conflict check method.................................................................
+  // conflict check method.................................................................
 
   async checkConflict(dto: CheckConflictDto) {
     const start = new Date(dto.startTime);

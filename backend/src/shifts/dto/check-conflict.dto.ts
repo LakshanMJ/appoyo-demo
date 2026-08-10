@@ -9,9 +9,6 @@ export class CheckConflictDto {
   @IsNotEmpty()
   endTime!: string;
 
-  // @IsString()
-  // @IsNotEmpty()
-  // participantId?: string;
   @IsOptional()
   @IsUUID()
   participantId?: string | null;
@@ -22,5 +19,5 @@ export class CheckConflictDto {
 
   @IsString()
   @IsOptional()
-  excludeShiftId?: string; // Used when updating an existing shift so it doesn't conflict with itself
+  excludeShiftId?: string;
 }

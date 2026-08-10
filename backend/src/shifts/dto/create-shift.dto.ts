@@ -2,17 +2,13 @@ import { IsEnum, IsNotEmpty, IsOptional, IsString, IsDateString, IsUUID } from '
 import { ShiftCategory, ShiftType, ShiftStatus } from '@prisma/client';
 
 export class CreateShiftDto {
-  // @IsString()
-  // @IsNotEmpty()
-  // participantId?: string | null;
-
   @IsOptional()
   @IsUUID()
   participantId?: string | null;
 
   @IsString()
   @IsOptional()
-  caregiverId?: string; // Optional for Vacant Shifts
+  caregiverId?: string;
 
   @IsDateString()
   @IsNotEmpty()

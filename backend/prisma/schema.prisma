@@ -37,7 +37,7 @@ enum ShiftStatus {
 }
 
 model User {
-  id             String       @id @default(uuid())
+  id String @id @default(uuid())
 
   name     String
   email    String   @unique
@@ -53,15 +53,15 @@ model User {
 }
 
 model Participant {
-  id             String       @id @default(uuid())
+  id String @id @default(uuid())
 
-  firstName    String
-  lastName    String
-  phone   String?
-  addressLine1 String?
-  addressLine2 String?
-  allocatedBudget Int @default(0)
-  
+  firstName       String
+  lastName        String
+  phone           String?
+  addressLine1    String?
+  addressLine2    String?
+  allocatedBudget Int     @default(0)
+
   shifts Shift[]
 
   createdAt DateTime @default(now())
@@ -72,13 +72,13 @@ model Participant {
 }
 
 model Caregiver {
-  id             String       @id @default(uuid())
+  id String @id @default(uuid())
 
   userId String? @unique // Added @unique for 1:1 relation consistency
   user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
-  name  String
-  phone String?
+  name      String
+  phone     String?
   avatarUrl String?
 
   shifts Shift[]
@@ -90,7 +90,7 @@ model Caregiver {
 }
 
 model Shift {
-  id             String       @id @default(uuid())
+  id String @id @default(uuid())
 
   participantId String?
   participant   Participant? @relation(fields: [participantId], references: [id], onDelete: SetNull)
