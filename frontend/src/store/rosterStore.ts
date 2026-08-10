@@ -24,7 +24,10 @@ interface RosterStore {
     addressLine1: string;
     addressLine2: string;
     allocatedBudget?: number;
-  }) => Promise<void>;
+  }) => Promise<{
+    success: boolean;
+    message?: string;
+  }>;
   moveShift: (shiftId: string, targetParticipantId: string | null, targetDate: string) => Promise<void>;
   createShift: (
     dto: CreateShiftDto
@@ -70,17 +73,34 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
   },
 
   //2
+  // createParticipant: async (data) => {
+  //   try {
+  //     const participant = await rosterApi.participants.create(data);
+  //     set((state) => ({
+  //       participants: [
+  //         ...state.participants,
+  //         participant,
+  //       ],
+  //     }));
+  //   } catch (error) {
+  //     console.error("Failed to create participant", error);
+  //   }
+  // },
   createParticipant: async (data) => {
     try {
-      const participant = await rosterApi.participants.create(data);
-      set((state) => ({
-        participants: [
-          ...state.participants,
-          participant,
-        ],
-      }));
-    } catch (error) {
-      console.error("Failed to create participant", error);
+      await rosterApi.participants.create(data);
+      await get().loadParticipants();
+
+      return {
+        success: true,
+      };
+    } catch (error: any) {
+      console.error(error);
+
+      return {
+        success: false,
+        message: error.response?.data?.message,
+      };
     }
   },
 
@@ -151,18 +171,42 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
   },
 
   // 5
+  // loadShifts: async (startDate, endDate) => {
+  //   try {
+  //     const shifts = await rosterApi.shifts.getAll(
+  //       startDate,
+  //       endDate
+  //     );
+  //     set({
+  //       shifts: shifts.filter((s: any) => s.participantId),
+  //       vacantShifts: shifts.filter((s: any) => !s.participantId),
+  //     });
+  //   } catch (error) {
+  //     console.error('Failed loading shifts', error);
+  //   }
+  // },
+
   loadShifts: async (startDate, endDate) => {
     try {
+      console.log('🟡 loadShifts START', { startDate, endDate });
+
       const shifts = await rosterApi.shifts.getAll(
         startDate,
         endDate
       );
+
+      console.log('🟢 loadShifts RECEIVED:', shifts);
+      console.log('🟢 NUMBER OF SHIFTS:', shifts.length);
+
       set({
         shifts: shifts.filter((s: any) => s.participantId),
         vacantShifts: shifts.filter((s: any) => !s.participantId),
       });
+
+      console.log('🟢 Zustand shifts SET');
     } catch (error) {
-      console.error('Failed loading shifts', error);
+      console.error('🔴 loadShifts FAILED:', error);
+      throw error;
     }
   },
 
@@ -223,6 +267,10 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
     const updated: Shift = {
       ...moved,
       participantId: targetParticipantId,
+      caregiverId:
+        targetParticipantId === null
+          ? null
+          : moved.caregiverId,
       startTime,
       endTime,
     };
@@ -255,6 +303,10 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
       await rosterApi.shifts.moveShift({
         shiftId,
         participantId: targetParticipantId,
+        caregiverId:
+          targetParticipantId === null
+            ? null
+            : moved.caregiverId,
         startTime,
         endTime,
       });

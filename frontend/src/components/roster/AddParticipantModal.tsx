@@ -10,7 +10,10 @@ interface Props {
     addressLine1: string;
     addressLine2: string;
     allocatedBudget: number;
-  }) => void;
+  }) => Promise<{
+    success: boolean;
+    message?: string;
+  }>;
 }
 
 export function AddParticipantModal({
@@ -23,11 +26,12 @@ export function AddParticipantModal({
   const [addressLine1, setAddressLine1] = useState("");
   const [addressLine2, setAddressLine2] = useState("");
   const [allocatedBudget, setAllocatedBudget] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!firstName.trim() || !lastName.trim()) return;
-    onSubmit({
+    setError(null);
+    const result = await onSubmit({
       firstName,
       lastName,
       phone,
@@ -35,6 +39,10 @@ export function AddParticipantModal({
       addressLine2,
       allocatedBudget: Number(allocatedBudget) || 0,
     });
+    if (!result?.success) {
+      setError('First name and last name cannot be empty.');
+      return;
+    }
     onClose();
   }
 
@@ -93,6 +101,12 @@ export function AddParticipantModal({
             placeholder="Allocated budget"
             className="w-full rounded-lg border p-2 border border-slate-200 text-[14px] focus:border-teal-400 focus:outline-none"
           />
+
+          {error && (
+            <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+              {error}
+            </div>
+          )}
 
           <div className="mt-4 flex justify-end gap-3">
             <button

@@ -40,10 +40,18 @@ export function DayCell({
   });
 
   return (
+    // <div
+    //   ref={setNodeRef}
+    //   className={`flex ${compact ? 'min-h-[56px]' : 'min-h-[92px]'
+    //     } flex-col gap-2.5 p-2.5 transition-colors ${isOver ? 'bg-teal-50 ring-2 ring-inset ring-teal-300' : ''
+    //     }`}
+    // >
     <div
       ref={setNodeRef}
-      className={`flex ${compact ? 'min-h-[56px]' : 'min-h-[92px]'
-        } flex-col gap-2.5 p-2.5 transition-colors ${isOver ? 'bg-teal-50 ring-2 ring-inset ring-teal-300' : ''
+      className={`flex h-full ${compact ? 'min-h-[56px]' : 'min-h-[92px]'
+        } flex-col gap-2.5 p-2.5 transition-colors ${isOver
+          ? 'bg-teal-50 ring-2 ring-inset ring-teal-300'
+          : ''
         }`}
     >
       {shifts.map((shift) => (
@@ -77,8 +85,7 @@ export function DayCell({
             className="flex flex-1 items-center justify-center rounded-sm border border-dashed text-slate-300 hover:border-teal-400 hover:text-teal-500"
           >
             <span
-              className={`h-px w-5 bg-[#94A3B8] ${compact ? 'translate-y-px' : ''
-                }`}
+              className={`h-px w-5 bg-[#94A3B8] ${compact ? 'translate-y-px' : ''}`}
             />
           </button>
         ))}

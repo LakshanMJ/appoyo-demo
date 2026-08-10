@@ -63,6 +63,7 @@ export interface CreateShiftDto {
 export interface MoveShiftDto {
   shiftId: string;
   participantId: string | null;
+  caregiverId: string | null;
   startTime: string;
   endTime: string;
 }

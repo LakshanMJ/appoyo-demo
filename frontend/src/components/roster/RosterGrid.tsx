@@ -75,34 +75,63 @@ export function RosterGrid({ weekStart }: RosterGridProps) {
     setDeleteTarget(shift);
   }
 
-  // useEffect(() => {
-  //   loadCaregivers();
-  //   loadParticipants();
-  //   loadShifts(
-  //     days[0].isoDate,
-  //     days[6].isoDate
-  //   );
-  // }, [weekStart]);
-
   useEffect(() => {
-    console.log('LOADING SHIFTS WITH:', {
-      firstDay: days[0]?.isoDate,
-      lastDay: days[6]?.isoDate,
-      days,
-    });
 
-    loadCaregivers();
-    loadParticipants();
 
-    if (!days[0]?.isoDate || !days[6]?.isoDate) {
-      console.warn('Skipping shift load: invalid days');
-      return;
-    }
+    let cancelled = false;
 
-    loadShifts(
-      days[0].isoDate,
-      days[6].isoDate,
-    );
+    const loadData = async () => {
+      console.log('LOADING SHIFTS WITH:', {
+        firstDay: days[0]?.isoDate,
+        lastDay: days[6]?.isoDate,
+        days,
+      });
+
+      if (!days[0]?.isoDate || !days[6]?.isoDate) {
+        console.warn('Skipping shift load: invalid days');
+        return;
+      }
+
+      for (let attempt = 1; attempt <= 10; attempt++) {
+        if (cancelled) return;
+
+        try {
+          console.log(`Loading dashboard data - attempt ${attempt}`);
+
+          await Promise.all([
+            loadCaregivers(),
+            loadParticipants(),
+            loadShifts(
+              days[0].isoDate,
+              days[6].isoDate
+            ),
+          ]);
+
+          console.log('Dashboard data loaded successfully');
+          return;
+        } catch (error) {
+          console.error(
+            `Dashboard load attempt ${attempt} failed:`,
+            error
+          );
+
+          if (attempt === 10) {
+            console.error('Backend unavailable after 10 attempts');
+            return;
+          }
+
+          await new Promise((resolve) =>
+            setTimeout(resolve, 1000)
+          );
+        }
+      }
+    };
+
+    loadData();
+             
+    return () => {
+      cancelled = true;
+    };
   }, [weekStart]);
 
   return (
