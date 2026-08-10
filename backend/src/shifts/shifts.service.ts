@@ -17,7 +17,7 @@ dayjs.extend(timezone);
 
 @Injectable()
 export class ShiftsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   // 1. Create Shift
   async create(dto: CreateShiftDto) {
@@ -68,41 +68,41 @@ export class ShiftsService {
   //   });
   // }
 
-async findAll(startDate: string, endDate: string) {
-  console.log('🔥 FIND ALL RECEIVED:', {
-    startDate,
-    endDate,
-  });
+  async findAll(startDate: string, endDate: string) {
+    console.log('🔥 FIND ALL RECEIVED:', {
+      startDate,
+      endDate,
+    });
 
-  const start = dayjs.tz(startDate, 'Australia/Brisbane').startOf('day').toDate();
+    const start = dayjs.tz(startDate, 'Australia/Brisbane').startOf('day').toDate();
 
-  const end = dayjs
-    .tz(endDate, 'Australia/Brisbane')
-    .add(1, 'day')
-    .startOf('day')
-    .toDate();
+    const end = dayjs
+      .tz(endDate, 'Australia/Brisbane')
+      .add(1, 'day')
+      .startOf('day')
+      .toDate();
 
-  console.log('🔥 DATE RANGE:', {
-    start,
-    end,
-  });
+    console.log('🔥 DATE RANGE:', {
+      start,
+      end,
+    });
 
-  return this.prisma.shift.findMany({
-    where: {
-      startTime: {
-        gte: start,
-        lt: end,
+    return this.prisma.shift.findMany({
+      where: {
+        startTime: {
+          gte: start,
+          lt: end,
+        },
       },
-    },
-    include: {
-      participant: true,
-      caregiver: true,
-    },
-    orderBy: {
-      startTime: 'asc',
-    },
-  });
-}
+      include: {
+        participant: true,
+        caregiver: true,
+      },
+      orderBy: {
+        startTime: 'asc',
+      },
+    });
+  }
 
   // 3. Update Shift
   async update(id: string, dto: CreateShiftDto) {
@@ -150,6 +150,42 @@ async findAll(startDate: string, endDate: string) {
   }
 
   // 4. Move Shift (Drag & Drop)
+  // async move(id: string, dto: MoveShiftDto) {
+  //   const existingShift = await this.prisma.shift.findUnique({
+  //     where: { id },
+  //   });
+
+  //   if (!existingShift) {
+  //     throw new NotFoundException('Shift not found');
+  //   }
+
+  //   const conflictResult = await this.checkConflict({
+  //     startTime: dto.startTime,
+  //     endTime: dto.endTime,
+  //     participantId: dto.participantId ?? existingShift.participantId,
+  //     caregiverId: existingShift.caregiverId ?? undefined,
+  //     excludeShiftId: id,
+  //   });
+
+  //   if (conflictResult.hasConflict) {
+  //     throw new BadRequestException(conflictResult.message);
+  //   }
+
+  //   return this.prisma.shift.update({
+  //     where: {
+  //       id,
+  //     },
+  //     data: {
+  //       participantId: dto.participantId ?? existingShift.participantId,
+  //       startTime: new Date(dto.startTime),
+  //       endTime: new Date(dto.endTime),
+  //     },
+  //     include: {
+  //       participant: true,
+  //       caregiver: true,
+  //     },
+  //   });
+  // }
   async move(id: string, dto: MoveShiftDto) {
     const existingShift = await this.prisma.shift.findUnique({
       where: { id },
@@ -159,11 +195,18 @@ async findAll(startDate: string, endDate: string) {
       throw new NotFoundException('Shift not found');
     }
 
+    const newParticipantId = dto.participantId;
+
+    const newCaregiverId =
+      newParticipantId === null
+        ? null
+        : dto.caregiverId ?? existingShift.caregiverId;
+
     const conflictResult = await this.checkConflict({
       startTime: dto.startTime,
       endTime: dto.endTime,
-      participantId: dto.participantId ?? existingShift.participantId,
-      caregiverId: existingShift.caregiverId ?? undefined,
+      participantId: newParticipantId ?? undefined,
+      caregiverId: newCaregiverId ?? undefined,
       excludeShiftId: id,
     });
 
@@ -176,7 +219,8 @@ async findAll(startDate: string, endDate: string) {
         id,
       },
       data: {
-        participantId: dto.participantId ?? existingShift.participantId,
+        participantId: newParticipantId,
+        caregiverId: newCaregiverId,
         startTime: new Date(dto.startTime),
         endTime: new Date(dto.endTime),
       },

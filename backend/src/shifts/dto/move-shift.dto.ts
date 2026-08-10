@@ -14,4 +14,8 @@ export class MoveShiftDto {
 
   @IsISO8601()
   endTime!: string;
+
+  @IsOptional()
+  @IsString()
+  caregiverId?: string | null;
 }
